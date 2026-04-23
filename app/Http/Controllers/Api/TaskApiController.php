@@ -109,6 +109,7 @@ class TaskApiController extends Controller
             'recurrence_timezone' => 'nullable|string|timezone',
             'is_active' => 'boolean',
             'is_archived' => 'boolean',
+            'task_list_id' => 'nullable|integer|exists:task_lists,id',
         ]);
 
         if (! empty($validated['due_at'])) {

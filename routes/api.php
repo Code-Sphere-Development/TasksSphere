@@ -27,4 +27,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/tasks/{task}', [TaskApiController::class, 'destroy']);
     Route::post('/tasks/{task}/complete', [TaskApiController::class, 'complete']);
     Route::post('/tasks/{task}/skip', [TaskApiController::class, 'skip']);
+
+    // Task Lists
+    Route::get('/task-lists', [\App\Http\Controllers\Api\TaskListApiController::class, 'index']);
+    Route::post('/task-lists', [\App\Http\Controllers\Api\TaskListApiController::class, 'store']);
+    Route::get('/task-lists/{taskList}', [\App\Http\Controllers\Api\TaskListApiController::class, 'show']);
+    Route::put('/task-lists/{taskList}', [\App\Http\Controllers\Api\TaskListApiController::class, 'update']);
+    Route::delete('/task-lists/{taskList}', [\App\Http\Controllers\Api\TaskListApiController::class, 'destroy']);
+
+    // List Items
+    Route::get('/task-lists/{taskList}/items', [\App\Http\Controllers\Api\ListItemApiController::class, 'index']);
+    Route::post('/task-lists/{taskList}/items', [\App\Http\Controllers\Api\ListItemApiController::class, 'store']);
+    Route::put('/task-lists/{taskList}/items/{item}', [\App\Http\Controllers\Api\ListItemApiController::class, 'update']);
+    Route::delete('/task-lists/{taskList}/items/{item}', [\App\Http\Controllers\Api\ListItemApiController::class, 'destroy']);
 });
