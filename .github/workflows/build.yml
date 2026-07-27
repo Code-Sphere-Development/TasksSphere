@@ -1,109 +1,184 @@
-name: CI/CD Pipeline
+name: CI
 
 on:
   push:
-    branches:
-      - main
-    tags:
-      - '*'
+    branches: [main]
+    tags: ['*']
   pull_request:
-    branches:
-      - main
+    branches: [main]
+
+# Neue Pushes auf denselben Ref brechen laufende Jobs ab.
+# Auf main wird NICHT abgebrochen, damit ein laufender Deploy nicht
+# mitten im Restart unterbrochen wird.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
 
 jobs:
-  preparation:
+  # ---------------------------------------------------------------------------
+  # 1. Code-Style-Check (Pint)
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Pint
     runs-on: ubuntu-latest
-    container: lorisleiva/laravel-docker:latest
     steps:
       - uses: actions/checkout@v7
-      - name: Set up PHP
-        run: php -v
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: pint
+          coverage: none
+
+      - name: Run Pint
+        run: pint --test
+
+  # ---------------------------------------------------------------------------
+  # 2. PHPUnit + Migrations gegen SQLite
+  # ---------------------------------------------------------------------------
+  php-tests:
+    name: PHP Tests (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    needs: [frontend-build]
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.5']
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, dom, fileinfo, sqlite3, bcmath, intl, gd, zip, pdo_sqlite
+          coverage: none
+          tools: composer:v2
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-php${{ matrix.php }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php${{ matrix.php }}-composer-
+
       - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Prepare Laravel environment
         run: |
-          composer install --prefer-dist --no-interaction --no-progress --no-scripts
           cp .env.example .env
           php artisan key:generate
-      - name: Cache Composer packages
-        uses: actions/cache@v6
-        with:
-          path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-      - name: Install npm dependencies
-        run: |
-          npm --version
-          npm ci
-      - name: Cache npm packages
-        uses: actions/cache@v6
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
+          touch database/database.sqlite
 
-  building:
-    needs: preparation
+      - name: Download frontend build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: public-build
+          path: public/build
+
+      - name: Run migrations
+        run: php artisan migrate --force
+
+      - name: Run Pest
+        run: vendor/bin/pest --colors=always
+
+  # ---------------------------------------------------------------------------
+  # 3. Frontend-Build (Vite)
+  # ---------------------------------------------------------------------------
+  frontend-build:
+    name: Frontend Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Set up Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: '14'
+          node-version: '20'
+          cache: 'npm'
+
       - name: Install npm dependencies
-        run: npm install
-      - name: Build the project
+        run: npm ci
+
+      - name: Build assets
         run: npm run build
 
-  db-seeding:
-    needs: preparation
-    container: lorisleiva/laravel-docker:latest
-    runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:latest
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: mysql_db
-        ports:
-          - 3306:3306
-    steps:
-      - uses: actions/checkout@v7
-      - name: Composer install
-        run: |
-          composer install --prefer-dist --no-interaction --no-progress --no-scripts
-          cp .env.example .env
-          echo "DB_CONNECTION=mysql" >> .env
-          echo "DB_HOST=mysql" >> .env
-          echo "DB_PORT=3306" >> .env
-          echo "DB_DATABASE=mysql_db" >> .env
-          echo "DB_USERNAME=root" >> .env
-          echo "DB_PASSWORD=root" >> .env
-          php artisan key:generate
-      - name: Wait for MySQL
-        run: |
-          until nc -z mysql 3306; do
-           echo "Waiting for MySQL..."
-           sleep 1
-          done
-      - name: Seed database
-        run: |
-          mysql --version
-          php artisan migrate:fresh --seed --force
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: public-build
+          path: public/build
+          retention-days: 7
+          if-no-files-found: error
 
-  restart_pterodactyl_server:
-    needs: [building, db-seeding]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  # ---------------------------------------------------------------------------
+  # 4. Deploy (Panel Restart) – nur wenn alle obigen Jobs grün sind
+  #    UND der Trigger ein Push auf main ist (keine PRs, keine Tags).
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Deploy (Panel Restart)
     runs-on: ubuntu-latest
+    needs: [lint, php-tests, frontend-build]
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+
+    # Eigene Concurrency-Gruppe nur für den Deploy-Step:
+    # gleichzeitige Deploys werden serialisiert, der ältere abgebrochen.
+    concurrency:
+      group: deploy-main
+      cancel-in-progress: true
+
+    permissions:
+      contents: read
+
+    environment:
+      name: production
+      url: https://panel.code-sphere.de
+
     steps:
-      - name: Restart Server via Pterodactyl API
+      - name: Trigger restart via Panel API
         env:
-          PTERODACTYL_API_KEY: ${{ secrets.PTERODACTYL_API_KEY }}
-          SERVER_ID: ${{ vars.PTERODACTYL_SERVER_ID }}
+          PANEL_API_KEY: ${{ secrets.PANEL_API_KEY }}
+          PANEL_SERVER_ID: ${{ vars.PANEL_SERVER_ID }}
+          PANEL_BASE_URL: ${{ vars.PANEL_BASE_URL || 'https://panel.code-sphere.de' }}
         run: |
-          echo "Restarting server with ID: ${SERVER_ID}"
-          curl -X POST "https://panel.golden-developer.de/api/client/servers/${SERVER_ID}/power" \
-            -H "Authorization: Bearer $PTERODACTYL_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d '{"signal": "restart"}'
+          set -euo pipefail
+
+          if [[ -z "${PANEL_API_KEY:-}" ]]; then
+            echo "::error::PANEL_API_KEY secret is missing."
+            exit 1
+          fi
+          if [[ -z "${PANEL_SERVER_ID:-}" ]]; then
+            echo "::error::PANEL_SERVER_ID variable is missing."
+            exit 1
+          fi
+
+          echo "Restarting server ${PANEL_SERVER_ID} on ${PANEL_BASE_URL}"
+
+          http_code=$(curl --silent --show-error --output /tmp/panel.log --write-out "%{http_code}" \
+            --request POST "${PANEL_BASE_URL}/api/client/servers/${PANEL_SERVER_ID}/power" \
+            --header "Authorization: Bearer ${PANEL_API_KEY}" \
+            --header "Content-Type: application/json" \
+            --header "Accept: application/json" \
+            --data '{"signal": "restart"}')
+
+          echo "HTTP ${http_code}"
+          cat /tmp/panel.log || true
+
+          # Panel Power-Endpoint antwortet bei Erfolg mit 204 No Content.
+          if [[ "${http_code}" != "204" && "${http_code}" != "200" ]]; then
+            echo "::error::Panel returned HTTP ${http_code}"
+            exit 1
+          fi
+
+          echo "Restart triggered successfully."
