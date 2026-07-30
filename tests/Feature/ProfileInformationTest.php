@@ -1,43 +1,35 @@
 <?php
 
-namespace Tests\Feature;
-
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Jetstream\Http\Livewire\UpdateProfileInformationForm;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class ProfileInformationTest extends TestCase
-{
-    use RefreshDatabase;
+uses(RefreshDatabase::class);
 
-    public function test_current_profile_information_is_available(): void
-    {
-        $this->actingAs($user = User::factory()->create());
+test('current profile information is available', function () {
+    $this->actingAs($user = User::factory()->create());
 
-        $component = Livewire::test(UpdateProfileInformationForm::class);
+    $component = Livewire::test(UpdateProfileInformationForm::class);
 
-        $this->assertEquals($user->first_name, $component->state['first_name']);
-        $this->assertEquals($user->last_name, $component->state['last_name']);
-        $this->assertEquals($user->email, $component->state['email']);
-    }
+    $this->assertEquals($user->first_name, $component->state['first_name']);
+    $this->assertEquals($user->last_name, $component->state['last_name']);
+    $this->assertEquals($user->email, $component->state['email']);
+});
 
-    public function test_profile_information_can_be_updated(): void
-    {
-        $this->actingAs($user = User::factory()->create());
+test('profile information can be updated', function () {
+    $this->actingAs($user = User::factory()->create());
 
-        Livewire::test(UpdateProfileInformationForm::class)
-            ->set('state', [
-                'first_name' => 'Test',
-                'last_name' => 'Name',
-                'email' => 'test@example.com',
-                'language' => 'de',
-            ])
-            ->call('updateProfileInformation');
+    Livewire::test(UpdateProfileInformationForm::class)
+        ->set('state', [
+            'first_name' => 'Test',
+            'last_name' => 'Name',
+            'email' => 'test@example.com',
+            'language' => 'de',
+        ])
+        ->call('updateProfileInformation');
 
-        $this->assertEquals('Test', $user->fresh()->first_name);
-        $this->assertEquals('Name', $user->fresh()->last_name);
-        $this->assertEquals('test@example.com', $user->fresh()->email);
-    }
-}
+    $this->assertEquals('Test', $user->fresh()->first_name);
+    $this->assertEquals('Name', $user->fresh()->last_name);
+    $this->assertEquals('test@example.com', $user->fresh()->email);
+});
