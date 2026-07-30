@@ -64,3 +64,60 @@ test('reminder command does not send duplicate notifications', function () {
 
     Notification::assertNothingSent();
 });
+
+test('reminder command marks task notified but does not send when push disabled', function () {
+    Notification::fake();
+
+    $user = User::factory()->create(['notify_push' => false]);
+    UserDevice::create(['user_id' => $user->id, 'device_id' => 'd1', 'fcm_token' => 'tok']);
+
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'due_at' => now()->subMinute(),
+        'completed_at' => null,
+        'last_notified_at' => null,
+    ]);
+
+    $this->artisan('tasks:send-reminders')->assertExitCode(0);
+
+    Notification::assertNothingSent();
+    expect($task->fresh()->last_notified_at)->not->toBeNull();
+});
+
+test('reminder command warns and marks notified when user has no fcm token', function () {
+    Notification::fake();
+
+    $user = User::factory()->create(['notify_push' => true]);
+
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'due_at' => now()->subMinute(),
+        'completed_at' => null,
+        'last_notified_at' => null,
+    ]);
+
+    $this->artisan('tasks:send-reminders')
+        ->expectsOutput("Kein FCM Token für Benutzer {$user->email} (Task ID {$task->id}) gefunden.")
+        ->assertExitCode(0);
+
+    Notification::assertNothingSent();
+    expect($task->fresh()->last_notified_at)->not->toBeNull();
+});
+
+test('reminder command warns and marks notified when task has no user', function () {
+    Notification::fake();
+
+    $task = Task::factory()->create([
+        'user_id' => 999999,
+        'due_at' => now()->subMinute(),
+        'completed_at' => null,
+        'last_notified_at' => null,
+    ]);
+
+    $this->artisan('tasks:send-reminders')
+        ->expectsOutput("Kein Benutzer für Task ID {$task->id} gefunden.")
+        ->assertExitCode(0);
+
+    Notification::assertNothingSent();
+    expect($task->fresh()->last_notified_at)->not->toBeNull();
+});
