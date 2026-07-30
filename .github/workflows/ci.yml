@@ -23,7 +23,7 @@ jobs:
   # ---------------------------------------------------------------------------
   lint:
     name: Pint
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v7
 
@@ -42,7 +42,7 @@ jobs:
   # ---------------------------------------------------------------------------
   php-tests:
     name: PHP Tests (PHP ${{ matrix.php }})
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [frontend-build]
     strategy:
       fail-fast: false
@@ -98,7 +98,7 @@ jobs:
   # ---------------------------------------------------------------------------
   frontend-build:
     name: Frontend Build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v7
 
@@ -128,7 +128,7 @@ jobs:
   # ---------------------------------------------------------------------------
   deploy:
     name: Deploy (Panel Restart)
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [lint, php-tests, frontend-build]
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
