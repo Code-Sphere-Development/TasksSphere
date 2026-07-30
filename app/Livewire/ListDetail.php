@@ -10,11 +10,17 @@ use Livewire\Component;
 class ListDetail extends Component
 {
     public TaskList $taskList;
+
     public $newItemTitle = '';
+
     public $editingItemId = null;
+
     public $editingItemTitle = '';
+
     public $editingItemNote = '';
+
     public $showCompletedItems = false;
+
     public $showTaskPicker = false;
 
     public function mount(TaskList $taskList): void
@@ -28,6 +34,7 @@ class ListDetail extends Component
         if ($this->taskList->isChecklist()) {
             $activeItems = $this->taskList->items()->where('is_completed', false)->orderBy('position')->get();
             $completedItems = $this->taskList->items()->where('is_completed', true)->orderBy('updated_at', 'desc')->get();
+
             return view('livewire.list-detail', [
                 'activeItems' => $activeItems,
                 'completedItems' => $completedItems,
@@ -36,6 +43,7 @@ class ListDetail extends Component
 
         $assignedTasks = $this->taskList->tasks()->where('is_archived', false)->orderBy('due_at')->get();
         $availableTasks = Auth::user()->tasks()->whereNull('task_list_id')->where('is_archived', false)->whereNull('completed_at')->orderBy('title')->get();
+
         return view('livewire.list-detail', [
             'assignedTasks' => $assignedTasks,
             'availableTasks' => $availableTasks,
@@ -56,7 +64,7 @@ class ListDetail extends Component
     {
         $item = ListItem::where('task_list_id', $this->taskList->id)->findOrFail($itemId);
         $this->authorize('update', $this->taskList);
-        $item->update(['is_completed' => !$item->is_completed]);
+        $item->update(['is_completed' => ! $item->is_completed]);
     }
 
     public function startEditItem(int $itemId): void

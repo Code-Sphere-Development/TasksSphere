@@ -26,7 +26,7 @@ class TaskList extends Model
 
     public function team(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Team::class);
+        return $this->belongsTo(Team::class);
     }
 
     public function items(): HasMany
@@ -69,6 +69,7 @@ class TaskList extends Model
         if ($this->isChecklist()) {
             return $this->items()->count();
         }
+
         return $this->tasks()->count();
     }
 
@@ -77,6 +78,7 @@ class TaskList extends Model
         if ($this->isChecklist()) {
             return $this->items()->where('is_completed', true)->count();
         }
+
         return $this->tasks()->whereNotNull('completed_at')->count();
     }
 }

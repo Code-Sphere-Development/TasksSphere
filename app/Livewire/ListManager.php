@@ -9,12 +9,19 @@ use Livewire\Component;
 class ListManager extends Component
 {
     public $title = '';
+
     public $description = '';
+
     public $type = 'checklist';
+
     public $icon = '';
+
     public $color = '';
+
     public $showForm = false;
+
     public $isEditing = false;
+
     public $editingListId = null;
 
     protected $rules = [

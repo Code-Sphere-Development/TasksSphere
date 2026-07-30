@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\TaskList;
+use App\Models\Team;
 use App\Models\User;
 
 class TaskListPolicy
@@ -18,7 +19,7 @@ class TaskListPolicy
             return true;
         }
 
-        if ($taskList->team_id && $user->belongsToTeam(\App\Models\Team::find($taskList->team_id))) {
+        if ($taskList->team_id && $user->belongsToTeam(Team::find($taskList->team_id))) {
             return true;
         }
 
@@ -42,7 +43,8 @@ class TaskListPolicy
         }
 
         if ($taskList->team_id) {
-            $team = \App\Models\Team::find($taskList->team_id);
+            $team = Team::find($taskList->team_id);
+
             return $team && $user->ownsTeam($team);
         }
 

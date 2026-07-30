@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Task;
+use App\Models\TaskCompletion;
 use App\Notifications\TaskReminderNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class TaskApiController extends Controller
@@ -43,7 +45,7 @@ class TaskApiController extends Controller
 
     public function completed()
     {
-        return \App\Models\TaskCompletion::with('task')
+        return TaskCompletion::with('task')
             ->whereHas('task', function ($query) {
                 $query->where('user_id', Auth::id());
             })
@@ -71,7 +73,7 @@ class TaskApiController extends Controller
         ]);
 
         if (! empty($validated['due_at']) && ! empty($validated['recurrence_timezone'])) {
-            $validated['due_at'] = \Illuminate\Support\Carbon::parse($validated['due_at'], $validated['recurrence_timezone'])
+            $validated['due_at'] = Carbon::parse($validated['due_at'], $validated['recurrence_timezone'])
                 ->setTimezone('UTC');
         }
 
@@ -115,7 +117,7 @@ class TaskApiController extends Controller
         if (! empty($validated['due_at'])) {
             $timezone = $validated['recurrence_timezone'] ?? $task->recurrence_timezone;
             if ($timezone) {
-                $validated['due_at'] = \Illuminate\Support\Carbon::parse($validated['due_at'], $timezone)
+                $validated['due_at'] = Carbon::parse($validated['due_at'], $timezone)
                     ->setTimezone('UTC');
             }
         }

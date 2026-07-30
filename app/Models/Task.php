@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\TaskFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Task extends Model
 {
-    /** @use HasFactory<\Database\Factories\TaskFactory> */
+    /** @use HasFactory<TaskFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -65,7 +67,7 @@ class Task extends Model
                 if (! $value) {
                     return null;
                 }
-                $date = \Illuminate\Support\Carbon::parse($value);
+                $date = Carbon::parse($value);
                 if ($this->recurrence_timezone) {
                     $date->setTimezone($this->recurrence_timezone);
                 }
@@ -85,7 +87,7 @@ class Task extends Model
                 if (! $value) {
                     return null;
                 }
-                $date = \Illuminate\Support\Carbon::parse($value);
+                $date = Carbon::parse($value);
                 if ($this->recurrence_timezone) {
                     $date->setTimezone($this->recurrence_timezone);
                 }
@@ -105,7 +107,7 @@ class Task extends Model
                 if (! $value) {
                     return null;
                 }
-                $date = \Illuminate\Support\Carbon::parse($value);
+                $date = Carbon::parse($value);
                 if ($this->recurrence_timezone) {
                     $date->setTimezone($this->recurrence_timezone);
                 }
@@ -123,7 +125,7 @@ class Task extends Model
     public function isHandledAt($date): bool
     {
         $timezone = $this->recurrence_timezone ?: config('app.timezone', 'UTC');
-        $plannedAt = \Illuminate\Support\Carbon::parse($date, $timezone)->setTimezone('UTC');
+        $plannedAt = Carbon::parse($date, $timezone)->setTimezone('UTC');
 
         return $this->completions->contains(function ($completion) use ($plannedAt) {
             return $completion->planned_at->equalTo($plannedAt);
@@ -133,7 +135,7 @@ class Task extends Model
     public function isSkippedAt($date): bool
     {
         $timezone = $this->recurrence_timezone ?: config('app.timezone', 'UTC');
-        $plannedAt = \Illuminate\Support\Carbon::parse($date, $timezone)->setTimezone('UTC');
+        $plannedAt = Carbon::parse($date, $timezone)->setTimezone('UTC');
 
         return $this->completions->contains(function ($completion) use ($plannedAt) {
             return $completion->planned_at->equalTo($plannedAt) && $completion->is_skipped;
@@ -143,7 +145,7 @@ class Task extends Model
     public function complete($plannedAt = null)
     {
         $timezone = $this->recurrence_timezone ?: config('app.timezone', 'UTC');
-        $plannedAt = $plannedAt ? \Illuminate\Support\Carbon::parse($plannedAt, $timezone)->setTimezone('UTC') : ($this->due_at ?: now());
+        $plannedAt = $plannedAt ? Carbon::parse($plannedAt, $timezone)->setTimezone('UTC') : ($this->due_at ?: now());
 
         if ($this->isRecurring()) {
             $this->completions()->updateOrCreate(
@@ -163,7 +165,7 @@ class Task extends Model
     public function skip($plannedAt)
     {
         $timezone = $this->recurrence_timezone ?: config('app.timezone', 'UTC');
-        $plannedAt = \Illuminate\Support\Carbon::parse($plannedAt, $timezone)->setTimezone('UTC');
+        $plannedAt = Carbon::parse($plannedAt, $timezone)->setTimezone('UTC');
 
         if ($this->isRecurring()) {
             $this->completions()->updateOrCreate(
@@ -183,8 +185,8 @@ class Task extends Model
     {
         $timezone = $this->recurrence_timezone ?: config('app.timezone', 'UTC');
         $occurrences = collect();
-        $start = \Illuminate\Support\Carbon::parse($start, $timezone)->setTimezone('UTC');
-        $end = \Illuminate\Support\Carbon::parse($end, $timezone)->setTimezone('UTC');
+        $start = Carbon::parse($start, $timezone)->setTimezone('UTC');
+        $end = Carbon::parse($end, $timezone)->setTimezone('UTC');
 
         if (! $this->isRecurring()) {
             if (! $this->due_at) {
@@ -266,7 +268,7 @@ class Task extends Model
         $timezone = $this->recurrence_timezone ?: config('app.timezone', 'UTC');
 
         // Wir arbeiten in der lokalen Zeitzone für die Berechnung
-        $currentDue = $from ? \Illuminate\Support\Carbon::parse($from) : ($this->due_at ? clone $this->due_at : now());
+        $currentDue = $from ? Carbon::parse($from) : ($this->due_at ? clone $this->due_at : now());
         $currentDue->setTimezone($timezone);
 
         if (! empty($times)) {

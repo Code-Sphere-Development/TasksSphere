@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\TaskList;
+use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,9 +14,12 @@ class TaskListApiController extends Controller
     {
         $user = Auth::user();
         $teamId = $user->currentTeam?->id;
+
         return TaskList::where(function ($q) use ($user, $teamId) {
             $q->where('user_id', $user->id);
-            if ($teamId) { $q->orWhere('team_id', $teamId); }
+            if ($teamId) {
+                $q->orWhere('team_id', $teamId);
+            }
         })->orderBy('position')->get();
     }
 
@@ -30,13 +34,14 @@ class TaskListApiController extends Controller
             'team_id' => 'nullable|integer',
         ]);
         if (isset($validated['team_id'])) {
-            $team = \App\Models\Team::findOrFail($validated['team_id']);
+            $team = Team::findOrFail($validated['team_id']);
             abort_unless(Auth::user()->belongsToTeam($team), 403);
             $validated['user_id'] = null;
         } else {
             $validated['user_id'] = Auth::id();
             $validated['team_id'] = null;
         }
+
         return TaskList::create($validated);
     }
 
@@ -44,6 +49,7 @@ class TaskListApiController extends Controller
     {
         $this->authorize('view', $taskList);
         $taskList->load($taskList->isChecklist() ? 'items' : 'tasks');
+
         return $taskList;
     }
 
@@ -58,6 +64,7 @@ class TaskListApiController extends Controller
             'position' => 'nullable|integer|min:0',
         ]);
         $taskList->update($validated);
+
         return $taskList;
     }
 
@@ -65,6 +72,7 @@ class TaskListApiController extends Controller
     {
         $this->authorize('delete', $taskList);
         $taskList->delete();
+
         return response()->json(['message' => 'List deleted']);
     }
 }

@@ -12,6 +12,7 @@ class ListItemApiController extends Controller
     public function index(TaskList $taskList)
     {
         $this->authorize('view', $taskList);
+
         return $taskList->items()->orderBy('position')->get();
     }
 
@@ -25,6 +26,7 @@ class ListItemApiController extends Controller
         ]);
         $maxPosition = $taskList->items()->max('position') ?? -1;
         $validated['position'] = $maxPosition + 1;
+
         return $taskList->items()->create($validated);
     }
 
@@ -39,6 +41,7 @@ class ListItemApiController extends Controller
             'position' => 'integer|min:0',
         ]);
         $item->update($validated);
+
         return $item;
     }
 
@@ -47,6 +50,7 @@ class ListItemApiController extends Controller
         $this->authorize('update', $taskList);
         abort_unless($item->task_list_id === $taskList->id, 404);
         $item->delete();
+
         return response()->json(['message' => 'Item deleted']);
     }
 }

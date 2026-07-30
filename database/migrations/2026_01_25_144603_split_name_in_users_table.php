@@ -17,9 +17,9 @@ return new class extends Migration
         });
 
         // Split existing names
-        \DB::table('users')->get()->each(function ($user) {
+        DB::table('users')->get()->each(function ($user) {
             $parts = explode(' ', $user->name, 2);
-            \DB::table('users')->where('id', $user->id)->update([
+            DB::table('users')->where('id', $user->id)->update([
                 'first_name' => $parts[0],
                 'last_name' => $parts[1] ?? '',
             ]);
@@ -41,8 +41,8 @@ return new class extends Migration
             $table->string('name')->after('id')->nullable();
         });
 
-        \DB::table('users')->get()->each(function ($user) {
-            \DB::table('users')->where('id', $user->id)->update([
+        DB::table('users')->get()->each(function ($user) {
+            DB::table('users')->where('id', $user->id)->update([
                 'name' => trim($user->first_name.' '.$user->last_name),
             ]);
         });

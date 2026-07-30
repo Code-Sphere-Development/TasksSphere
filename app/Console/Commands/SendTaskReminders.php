@@ -58,6 +58,7 @@ class SendTaskReminders extends Command
                 if ($user) {
                     if (! $user->notify_push) {
                         $task->update(['last_notified_at' => now()]);
+
                         continue;
                     }
 

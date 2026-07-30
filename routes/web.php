@@ -1,5 +1,7 @@
 <?php
 
+use App\Livewire\ListDetail;
+use App\Livewire\ListManager;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -15,6 +17,6 @@ Route::middleware([
         return view('dashboard');
     })->name('dashboard');
 
-    Route::get('/lists', \App\Livewire\ListManager::class)->name('lists.index');
-    Route::get('/lists/{taskList}', \App\Livewire\ListDetail::class)->name('lists.show');
+    Route::get('/lists', ListManager::class)->name('lists.index');
+    Route::get('/lists/{taskList}', ListDetail::class)->name('lists.show');
 });

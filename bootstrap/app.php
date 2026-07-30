@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\HandleFcmTokenHeader;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,8 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->append(\App\Http\Middleware\SetLocale::class);
-        $middleware->append(\App\Http\Middleware\HandleFcmTokenHeader::class);
+        $middleware->append(SetLocale::class);
+        $middleware->append(HandleFcmTokenHeader::class);
         $middleware->trustProxies(at: [
             '127.0.0.1',
             '192.168.0.0/16',
