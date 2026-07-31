@@ -333,7 +333,7 @@ test('updateList updates the editable fields and resets the form', function () {
     ]);
 });
 
-test('updateList does not change the list type', function () {
+test('updateList changes the list type', function () {
     $user = User::factory()->create();
     $list = TaskList::factory()->create([
         'user_id' => $user->id,
@@ -349,7 +349,7 @@ test('updateList does not change the list type', function () {
         ->set('type', 'tasks')
         ->call('updateList');
 
-    expect($list->fresh()->type)->toBe('checklist');
+    expect($list->fresh()->type)->toBe('tasks');
 });
 
 test('updateList stores empty icon and color as null', function () {

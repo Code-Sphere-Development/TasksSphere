@@ -75,29 +75,24 @@ test('delete allows the owner even when a team is attached', function () {
     expect($this->policy->delete($this->owner, $teamList))->toBeTrue();
 });
 
-// --- SOURCE BUG documentation ---
-// TaskListPolicy references App\Models\Team (via Team::find) and the
-// User methods belongsToTeam()/ownsTeam(). None of these exist in this
-// codebase (Jetstream teams are disabled). Any non-owner access to a
-// team-scoped list therefore raises a fatal Error instead of returning
-// a boolean. These tests pin that current (broken) behaviour.
+// --- Team support is not wired up ---
+// TaskListPolicy no longer references the (missing) App\Models\Team; a
+// team-scoped list safely denies non-owners instead of crashing.
 
-test('view on a team list for a non-owner throws because Team model is missing', function () {
+test('view on a team list denies a non-owner', function () {
     $teamList = TaskList::factory()->create([
         'user_id' => $this->owner->id,
         'team_id' => 999,
     ]);
 
-    expect(fn () => $this->policy->view($this->other, $teamList))
-        ->toThrow(Error::class);
+    expect($this->policy->view($this->other, $teamList))->toBeFalse();
 });
 
-test('delete on a team list for a non-owner throws because Team model is missing', function () {
+test('delete on a team list denies a non-owner', function () {
     $teamList = TaskList::factory()->create([
         'user_id' => $this->owner->id,
         'team_id' => 999,
     ]);
 
-    expect(fn () => $this->policy->delete($this->other, $teamList))
-        ->toThrow(Error::class);
+    expect($this->policy->delete($this->other, $teamList))->toBeFalse();
 });

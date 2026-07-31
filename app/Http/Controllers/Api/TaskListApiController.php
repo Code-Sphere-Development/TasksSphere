@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\TaskList;
-use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,16 +30,13 @@ class TaskListApiController extends Controller
             'type' => 'required|in:tasks,checklist',
             'icon' => 'nullable|string|max:32',
             'color' => 'nullable|string|max:7',
-            'team_id' => 'nullable|integer',
+            // Team support is not wired up; reject team-scoped lists explicitly
+            // (422) instead of crashing on the missing Team model.
+            'team_id' => 'prohibited',
         ]);
-        if (isset($validated['team_id'])) {
-            $team = Team::findOrFail($validated['team_id']);
-            abort_unless(Auth::user()->belongsToTeam($team), 403);
-            $validated['user_id'] = null;
-        } else {
-            $validated['user_id'] = Auth::id();
-            $validated['team_id'] = null;
-        }
+
+        $validated['user_id'] = Auth::id();
+        $validated['team_id'] = null;
 
         return TaskList::create($validated);
     }

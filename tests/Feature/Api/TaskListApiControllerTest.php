@@ -128,18 +128,16 @@ test('store fails validation when title exceeds 255 characters', function () {
         ->assertJsonValidationErrors('title');
 });
 
-// SOURCE BUG: the team_id branch references App\Models\Team, which does not
-// exist in this codebase (and User has no HasTeams trait). Any request that
-// passes team_id therefore triggers a fatal "Class not found" error, rendered
-// as HTTP 500. Asserting current behaviour to keep the suite green.
-test('store with team_id errors because the Team model is missing (source bug)', function () {
+// Team support is not wired up, so a team-scoped list is rejected with a
+// 422 validation error (team_id is prohibited) instead of crashing.
+test('store rejects a team_id because teams are not supported', function () {
     Sanctum::actingAs(User::factory()->create());
 
     $this->postJson('/api/task-lists', [
         'title' => 'Team list',
         'type' => 'tasks',
         'team_id' => 1,
-    ])->assertStatus(500);
+    ])->assertStatus(422)->assertJsonValidationErrors('team_id');
 });
 
 /*
