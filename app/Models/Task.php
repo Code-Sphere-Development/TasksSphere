@@ -74,7 +74,7 @@ class Task extends Model
 
                 return $date;
             }
-        );
+        )->withoutObjectCaching();
     }
 
     /**
@@ -94,7 +94,7 @@ class Task extends Model
 
                 return $date;
             }
-        );
+        )->withoutObjectCaching();
     }
 
     /**
@@ -114,7 +114,7 @@ class Task extends Model
 
                 return $date;
             }
-        );
+        )->withoutObjectCaching();
     }
 
     public function isRecurring(): bool

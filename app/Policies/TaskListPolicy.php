@@ -3,7 +3,6 @@
 namespace App\Policies;
 
 use App\Models\TaskList;
-use App\Models\Team;
 use App\Models\User;
 
 class TaskListPolicy
@@ -15,15 +14,10 @@ class TaskListPolicy
 
     public function view(User $user, TaskList $taskList): bool
     {
-        if ($taskList->user_id === $user->id) {
-            return true;
-        }
-
-        if ($taskList->team_id && $user->belongsToTeam(Team::find($taskList->team_id))) {
-            return true;
-        }
-
-        return false;
+        // Team support is not wired up (no Team model / HasTeams trait),
+        // so access is granted to the owner only. Team-scoped lists fall
+        // through to a safe deny instead of crashing on the missing Team.
+        return $taskList->user_id === $user->id;
     }
 
     public function create(User $user): bool
@@ -38,16 +32,6 @@ class TaskListPolicy
 
     public function delete(User $user, TaskList $taskList): bool
     {
-        if ($taskList->user_id === $user->id) {
-            return true;
-        }
-
-        if ($taskList->team_id) {
-            $team = Team::find($taskList->team_id);
-
-            return $team && $user->ownsTeam($team);
-        }
-
-        return false;
+        return $taskList->user_id === $user->id;
     }
 }

@@ -102,6 +102,7 @@ class ListManager extends Component
         $list->update([
             'title' => $this->title,
             'description' => $this->description,
+            'type' => $this->type,
             'icon' => $this->icon ?: null,
             'color' => $this->color ?: null,
         ]);
