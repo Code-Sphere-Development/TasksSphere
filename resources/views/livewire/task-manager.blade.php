@@ -205,8 +205,8 @@
                                             </div>
 
                                             <div class="flex-grow min-w-0">
-                                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                                    <div class="flex flex-col">
+                                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0">
+                                                    <div class="flex flex-col min-w-0">
                                                         <h3 class="text-base font-bold text-gray-900 dark:text-white truncate">
                                                             {{ $task->title }}
                                                         </h3>
@@ -280,11 +280,11 @@
                     <div class="space-y-3">
                         @foreach($completedCompletions as $completion)
                             <div class="bg-white/50 dark:bg-gray-800/50 rounded-xl p-4 flex items-center justify-between border border-gray-100 dark:border-gray-700 opacity-75">
-                                <div class="flex items-center space-x-3">
-                                    <div class="h-6 w-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                <div class="flex items-center space-x-3 min-w-0">
+                                    <div class="h-6 w-6 flex-shrink-0 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                                         <svg class="h-4 w-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                     </div>
-                                    <div>
+                                    <div class="min-w-0">
                                         <h3 class="text-base font-medium text-gray-600 dark:text-gray-400 line-through truncate">{{ $completion->task->title }}</h3>
                                         <p class="text-xs text-gray-400">
                                             {{ __('Erledigt :time', ['time' => $completion->completed_at->diffForHumans()]) }}
