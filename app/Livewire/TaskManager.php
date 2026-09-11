@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\TaskSource;
 use App\Models\TaskCompletion;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -158,6 +159,7 @@ class TaskManager extends Component
             'due_at' => $dueAt,
             'recurrence_rule' => $recurrence_rule,
             'recurrence_timezone' => $this->recurrence_timezone,
+            'source' => TaskSource::Manual,
         ]);
 
         $this->reset(['title', 'description', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'showForm']);

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TaskSource;
 use Database\Factories\TaskFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,6 +27,7 @@ class Task extends Model
         'recurrence_rule',
         'recurrence_timezone',
         'last_notified_at',
+        'source',
     ];
 
     protected $casts = [
@@ -35,6 +37,7 @@ class Task extends Model
         'is_active' => 'boolean',
         'is_archived' => 'boolean',
         'recurrence_rule' => 'array',
+        'source' => TaskSource::class,
     ];
 
     public function user()

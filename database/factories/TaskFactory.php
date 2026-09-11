@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\TaskSource;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -24,7 +25,15 @@ class TaskFactory extends Factory
             'description' => $this->faker->paragraph(),
             'due_at' => $this->faker->dateTimeBetween('now', '+1 month')->format('Y-m-d H:i:00'),
             'is_active' => true,
+            'source' => TaskSource::Manual,
         ];
+    }
+
+    public function agent(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'source' => TaskSource::Agent,
+        ]);
     }
 
     public function recurring($frequency = 'daily', $interval = 1)

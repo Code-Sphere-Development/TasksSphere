@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\TaskSource;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\TaskCompletion;
 use App\Notifications\TaskReminderNotification;
+use App\Support\TaskSourceResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class TaskApiController extends Controller
 {
@@ -55,10 +58,11 @@ class TaskApiController extends Controller
             ->get();
     }
 
-    public function store(Request $request)
+    public function store(Request $request, TaskSourceResolver $sourceResolver)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'source' => ['nullable', Rule::enum(TaskSource::class)],
             'description' => 'nullable|string',
             'due_at' => 'nullable|date',
             'recurrence_rule' => 'nullable|array',
@@ -76,6 +80,13 @@ class TaskApiController extends Controller
             $validated['due_at'] = Carbon::parse($validated['due_at'], $validated['recurrence_timezone'])
                 ->setTimezone('UTC');
         }
+
+        // Herkunft ist unveränderlich und wird deshalb nur hier gesetzt,
+        // nicht in update().
+        $validated['source'] = $sourceResolver->resolve(
+            $validated['source'] ?? null,
+            $request->user()->currentAccessToken(),
+        );
 
         $task = Auth::user()->tasks()->create($validated);
 

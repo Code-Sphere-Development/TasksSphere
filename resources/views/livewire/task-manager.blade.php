@@ -207,9 +207,16 @@
                                             <div class="flex-grow min-w-0">
                                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0">
                                                     <div class="flex flex-col min-w-0">
-                                                        <h3 class="text-base font-bold text-gray-900 dark:text-white truncate">
-                                                            {{ $task->title }}
-                                                        </h3>
+                                                        <div class="flex items-center gap-2 min-w-0">
+                                                            <h3 class="text-base font-bold text-gray-900 dark:text-white truncate">
+                                                                {{ $task->title }}
+                                                            </h3>
+                                                            @if($task->source && $task->source !== \App\Enums\TaskSource::Manual)
+                                                                <span class="flex-shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                                                                    {{ $task->source->label() }}
+                                                                </span>
+                                                            @endif
+                                                        </div>
                                                         @if($task->description)
                                                             <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $task->description }}</p>
                                                         @endif

@@ -72,5 +72,8 @@
     "Email Notifications": "Email Notifications",
     "Receive notifications via email.": "Receive notifications via email.",
     "Push Notifications": "Push Notifications",
-    "Receive push notifications on your devices.": "Receive push notifications on your devices."
+    "Receive push notifications on your devices.": "Receive push notifications on your devices.",
+    "Agent": "Agent",
+    "Import": "Import",
+    "Selbst angelegt": "Created manually"
 }
