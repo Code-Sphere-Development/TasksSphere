@@ -103,6 +103,7 @@ class User extends Authenticatable
     public function routeNotificationForFcm(): array|string|null
     {
         return $this->devices()
+            ->active()
             ->pluck('fcm_token')
             ->toArray();
     }
@@ -122,17 +123,21 @@ class User extends Authenticatable
             ->delete();
 
         if ($deviceId) {
-            $this->devices()->updateOrCreate(
+            $device = $this->devices()->updateOrCreate(
                 ['device_id' => $deviceId],
                 ['fcm_token' => $fcmToken]
             );
         } else {
             // Wenn keine device_id vorhanden ist, nutzen wir den fcm_token selbst als Identifikator
-            $this->devices()->updateOrCreate(
+            $device = $this->devices()->updateOrCreate(
                 ['fcm_token' => $fcmToken],
                 ['device_id' => null]
             );
         }
+
+        // Das Gerät hat sich soeben gemeldet - das ist der einzige Beleg dafür,
+        // dass die App dort noch angemeldet ist.
+        $device->markSeen();
 
         // Abwärtskompatibilität: Einzelnes Token im User-Model ebenfalls aktualisieren
         if ($this->fcm_token !== $fcmToken) {
