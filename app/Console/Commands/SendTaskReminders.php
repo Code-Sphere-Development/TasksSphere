@@ -30,6 +30,16 @@ class SendTaskReminders extends Command
     {
         Log::info('Scheduler: tasks:send-reminders command execution started.');
 
+        if (! $this->firebaseProjectIsConfigured()) {
+            $project = config('firebase.default');
+            $message = "Firebase-Projekt [{$project}] ist in config/firebase.php nicht definiert. Es wurde nichts versendet.";
+
+            $this->error($message);
+            Log::error('Scheduler: '.$message);
+
+            return self::FAILURE;
+        }
+
         $now = now();
 
         // Wir suchen nach Aufgaben, die fällig sind (due_at <= now),
@@ -87,5 +97,19 @@ class SendTaskReminders extends Command
         });
 
         Log::info('Scheduler: tasks:send-reminders command execution finished.');
+
+        return self::SUCCESS;
+    }
+
+    /**
+     * Ein falsch gesetztes FIREBASE_PROJECT laesst jeden Versand scheitern. Ohne
+     * diese Vorabpruefung verschwindet das in der Fehlerbehandlung je Aufgabe,
+     * die dabei auch noch last_notified_at setzt - der Termin waere still weg.
+     */
+    private function firebaseProjectIsConfigured(): bool
+    {
+        $project = config('firebase.default');
+
+        return is_string($project) && ! empty(config('firebase.projects.'.$project));
     }
 }

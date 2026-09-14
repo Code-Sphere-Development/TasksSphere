@@ -9,7 +9,7 @@ return [
      * ------------------------------------------------------------------------
      */
 
-    'default' => env('FIREBASE_PROJECT', 'app'),
+    'default' => env('FIREBASE_PROJECT', 'taskssphere'),
 
     /*
      * ------------------------------------------------------------------------
@@ -18,7 +18,9 @@ return [
      */
 
     'projects' => [
-        'app' => [
+        // Der Schluessel muss zu FIREBASE_PROJECT passen, sonst findet
+        // FirebaseProjectManager::configuration() nichts und jeder Versand wirft.
+        'taskssphere' => [
 
             /*
              * ------------------------------------------------------------------------

@@ -121,3 +121,29 @@ test('reminder command warns and marks notified when task has no user', function
     Notification::assertNothingSent();
     expect($task->fresh()->last_notified_at)->not->toBeNull();
 });
+
+test('reminder command aborts loudly when the configured firebase project does not exist', function () {
+    Notification::fake();
+
+    config(['firebase.default' => 'does-not-exist']);
+
+    $user = User::factory()->create();
+    UserDevice::create([
+        'user_id' => $user->id,
+        'device_id' => 'device-123',
+        'fcm_token' => 'fake-fcm-token',
+    ]);
+
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'due_at' => now()->subMinute(),
+        'completed_at' => null,
+        'last_notified_at' => null,
+    ]);
+
+    $this->artisan('tasks:send-reminders')->assertFailed();
+
+    Notification::assertNothingSent();
+    // Die Aufgabe darf nicht als benachrichtigt gelten, sonst geht der Termin verloren.
+    expect($task->fresh()->last_notified_at)->toBeNull();
+});
