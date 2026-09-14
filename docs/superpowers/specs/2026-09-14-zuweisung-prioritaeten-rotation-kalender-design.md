@@ -125,8 +125,20 @@ Zu beachten: `Task::getOccurrences()` läuft je Aufgabe in PHP mit einer Schleif
 
 Punkte und Bestenlisten, Unteraufgaben, Labels, Vorlagen, natürlichsprachige Eingabe, mehrstufige Erinnerungen, adaptive Wiederholung, Telegram und Webhooks, Auswertungen, Import/Export, zustandsbasierte Auslöser, Tablet-Kiosk — alles aus Donetick, alles denkbar, nichts davon jetzt. Ebenso: die Anbindung an AccountSphere und FamilyNetwork selbst, echte Einladungsmails, und ein Rechtemodell für den Gehirn-Agenten (am 2026-09-11 abgelehnt, der Agent behält Vollrechte).
 
-## Offene Punkte
+## Entschieden bei der Umsetzung
 
-1. Ob „über E-Mail" tatsächlich echte Einladungen an Personen ohne Konto meint. Wenn ja, kommt ein eigenes Vorhaben davor.
-2. Ob eine Person in mehreren Haushalten sein darf. Das Datenmodell erlaubt es; die Oberfläche wäre einfacher, wenn nicht.
-3. Ob `GET /api/tasks` langfristig zugewiesene Aufgaben mitliefern soll. Vorerst nein, weil der Gehirn-Agent daran hängt.
+1. „Über E-Mail" heißt: eine Person anhand ihrer Adresse **finden**. Echte Einladungen an Personen ohne Konto bleiben ein eigenes Vorhaben.
+2. Eine Person **darf** in mehreren Haushalten sein. `LocalPeopleDirectory` vereinigt deren Mitglieder.
+3. `GET /api/tasks` behält seine Bedeutung. Zugewiesene Aufgaben liefert es nur auf `?include=assigned`; ein Test sichert das ab, weil der Gehirn-Agent daran hängt.
+
+## Was die Umsetzung zusätzlich zutage gefördert hat
+
+**Die Terminobergrenze war ein Bestandsfehler, kein Kalenderproblem.** Der Entwurf vermutete, ein Monatsfenster könnte an die Grenze von 100 stoßen. Die Messung zeigte: sie greift **schon heute**. Eine stündliche Aufgabe müsste über das Sieben-Tage-Fenster des Dashboards 168 Termine liefern und lieferte 100 — über ein Drittel fehlte stillschweigend, in der Weboberfläche wie in `GET /api/tasks/occurrences`. Die Grenze ist jetzt konfigurierbar und auf 750 gesetzt.
+
+**`task_completions.completed_by` war Voraussetzung, nicht Beiwerk.** Ohne die Spalte lässt sich die Rotationsstrategie „am seltensten erledigt" gar nicht berechnen.
+
+## Noch offen
+
+- Punkte und Bestenlisten, Unteraufgaben, Labels, Vorlagen, natürlichsprachige Eingabe, mehrstufige Erinnerungen, adaptive Wiederholung, Telegram und Webhooks, Auswertungen, Import/Export, Tablet-Kiosk.
+- Die Anbindung an AccountSphere und FamilyNetwork selbst. Die Naht dafür steht: `PeopleDirectory` und `households.external_ref`.
+- Aus dem früheren Plan weiterhin offen: Erledigt rückgängig machen, Liste beim Anlegen wählen, Suchen und Filtern, Archiv und Papierkorb.
