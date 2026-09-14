@@ -19,7 +19,7 @@
                         @if($plannedAt)
                             <span class="w-10 flex-shrink-0 tabular-nums text-xs text-gray-400">{{ $plannedAt->format('H:i') }}</span>
                         @endif
-                        <span class="flex-grow min-w-0 truncate text-sm text-gray-700 dark:text-gray-300">{{ $task->title }}</span>
+                        <span class="flex-grow min-w-0 truncate text-sm text-gray-700 dark:text-gray-300" title="{{ $task->title }}">{{ $task->displayTitle }}</span>
                         @if($task->assignedTo)
                             <span class="flex-shrink-0 inline-flex h-5 w-5 items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900/40 text-[10px] font-bold text-teal-700 dark:text-teal-300"
                                   title="{{ $task->assignedTo->name }}">

@@ -94,6 +94,9 @@
                     <button type="button" wire:click="editTask({{ $detailTask->id }})" class="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-bold rounded-xl shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all">
                         {{ __('Bearbeiten') }}
                     </button>
+                    <button type="button" wire:click="deleteTask({{ $detailTask->id }}, '{{ $detailPlannedAt }}')" class="w-full sm:w-auto sm:mr-auto inline-flex justify-center items-center px-6 py-3 text-base font-medium rounded-xl text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors">
+                        {{ __('Löschen') }}
+                    </button>
                 </div>
             </div>
         </div>

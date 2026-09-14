@@ -244,6 +244,40 @@ class Task extends Model
     }
 
     /**
+     * Ein vorangestellter Herkunftsverweis wie "FamilyNetwork#1", sofern der
+     * Titel mit einem solchen beginnt und danach noch etwas folgt.
+     *
+     * Der Gehirn-Agent stellt seinen Aufgaben solche Verweise voran. In der
+     * Liste wuerden sie den sichtbaren Teil des Titels auffressen, deshalb
+     * werden sie fuer die Anzeige abgetrennt. Am gespeicherten Titel aendert
+     * sich nichts - er bleibt die Wahrheit fuer API und Suche.
+     */
+    protected function titleReference(): Attribute
+    {
+        return Attribute::get(fn () => $this->splitTitle()[0]);
+    }
+
+    /** Der Titel ohne den vorangestellten Verweis. */
+    protected function displayTitle(): Attribute
+    {
+        return Attribute::get(fn () => $this->splitTitle()[1]);
+    }
+
+    /**
+     * @return array{0: ?string, 1: string}
+     */
+    private function splitTitle(): array
+    {
+        $title = (string) $this->title;
+
+        if (preg_match('/^([A-Za-z][A-Za-z0-9_.-]*#\d+)\s*[.\-–—:]?\s+(\S.*)$/u', $title, $matches) === 1) {
+            return [$matches[1], trim($matches[2])];
+        }
+
+        return [null, $title];
+    }
+
+    /**
      * Kurzform fuer die Zeile: nur Takt und Wochentage, ohne Uhrzeiten und
      * Zeitzone. Die vollstaendige Fassung steht in der Detailansicht.
      */

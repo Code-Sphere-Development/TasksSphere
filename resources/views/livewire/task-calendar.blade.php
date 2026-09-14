@@ -65,7 +65,7 @@
                                             $task->priority?->badgeClasses() ?: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
                                         ]) title="{{ $task->title }}">
                                             <span class="font-bold">{{ $occurrence['planned_at']->format('H:i') }}</span>
-                                            {{ $task->title }}
+                                            {{ $task->displayTitle }}
                                             @if($task->assignedTo)
                                                 <span class="block truncate opacity-75">{{ $task->assignedTo->name }}</span>
                                             @endif

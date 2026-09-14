@@ -450,3 +450,32 @@ test('updating a task can shrink the circle', function () {
 
     expect($task->fresh()->assignees->pluck('id')->all())->toBe([$a->id]);
 });
+
+test('the task row shows a preview of the description', function () {
+    $user = User::factory()->create();
+    Task::factory()->create([
+        'user_id' => $user->id,
+        'title' => 'Reifen wechseln',
+        'description' => 'Termin bei der Werkstatt vereinbaren.',
+        'due_at' => now()->addHour(),
+        'is_archived' => false,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->assertSee('Termin bei der Werkstatt vereinbaren.');
+});
+
+test('a leading reference is shown apart from the title', function () {
+    $user = User::factory()->create();
+    Task::factory()->create([
+        'user_id' => $user->id,
+        'title' => 'FamilyNetwork#14 . Einkaufsliste ergänzen',
+        'due_at' => now()->addHour(),
+        'is_archived' => false,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->assertSeeInOrder(['FamilyNetwork#14', 'Einkaufsliste ergänzen']);
+});
