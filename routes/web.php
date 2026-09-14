@@ -3,6 +3,7 @@
 use App\Livewire\HouseholdManager;
 use App\Livewire\ListDetail;
 use App\Livewire\ListManager;
+use App\Livewire\TaskCalendar;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,6 +18,8 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    Route::get('/calendar', TaskCalendar::class)->name('calendar.index');
 
     Route::get('/household', HouseholdManager::class)->name('household.index');
 
