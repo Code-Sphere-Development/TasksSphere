@@ -2,6 +2,7 @@
 
 use App\Models\Task;
 use App\Models\TaskCompletion;
+use App\Models\TaskList;
 use App\Models\User;
 use App\Notifications\TaskReminderNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -461,4 +462,43 @@ test('completed lists a one off task that was completed through the api', functi
     $this->getJson('/api/tasks/completed')
         ->assertOk()
         ->assertJsonPath('0.task_id', $task->id);
+});
+
+test('update rejects a task list owned by another user', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $task = Task::factory()->for($user)->create(['task_list_id' => null]);
+    $foreignList = TaskList::factory()->create();
+
+    $this->putJson("/api/tasks/{$task->id}", ['task_list_id' => $foreignList->id])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('task_list_id');
+
+    expect($task->fresh()->task_list_id)->toBeNull();
+});
+
+test('update rejects a soft deleted task list', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $task = Task::factory()->for($user)->create(['task_list_id' => null]);
+    $ownList = TaskList::factory()->for($user)->create();
+    $ownList->delete();
+
+    $this->putJson("/api/tasks/{$task->id}", ['task_list_id' => $ownList->id])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('task_list_id');
+});
+
+test('update accepts a task list owned by the user', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $task = Task::factory()->for($user)->create(['task_list_id' => null]);
+    $ownList = TaskList::factory()->for($user)->create();
+
+    $this->putJson("/api/tasks/{$task->id}", ['task_list_id' => $ownList->id])->assertOk();
+
+    expect($task->fresh()->task_list_id)->toBe($ownList->id);
 });

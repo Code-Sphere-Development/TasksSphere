@@ -122,7 +122,11 @@ class TaskApiController extends Controller
             'recurrence_timezone' => 'nullable|string|timezone',
             'is_active' => 'boolean',
             'is_archived' => 'boolean',
-            'task_list_id' => 'nullable|integer|exists:task_lists,id',
+            // Ohne Besitzerbezug liesse sich die eigene Aufgabe an eine fremde
+            // Liste haengen; sie taucht dort in der Listenansicht auf.
+            'task_list_id' => ['nullable', 'integer', Rule::exists('task_lists', 'id')
+                ->where('user_id', Auth::id())
+                ->whereNull('deleted_at')],
         ]);
 
         if (! empty($validated['due_at'])) {
