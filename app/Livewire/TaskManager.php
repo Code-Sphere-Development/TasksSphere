@@ -253,7 +253,7 @@ class TaskManager extends Component
     public function completeTask($taskId, $plannedAt = null): void
     {
         $task = Auth::user()->tasks()->findOrFail($taskId);
-        $task->complete($plannedAt);
+        $task->complete($plannedAt, Auth::user());
         $this->closeTaskDetail();
     }
 

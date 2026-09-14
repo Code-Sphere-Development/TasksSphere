@@ -11,6 +11,7 @@ class TaskCompletion extends Model
 
     protected $fillable = [
         'task_id',
+        'completed_by',
         'planned_at',
         'completed_at',
         'is_skipped',
@@ -25,5 +26,10 @@ class TaskCompletion extends Model
     public function task()
     {
         return $this->belongsTo(Task::class);
+    }
+
+    public function completedBy()
+    {
+        return $this->belongsTo(User::class, 'completed_by');
     }
 }

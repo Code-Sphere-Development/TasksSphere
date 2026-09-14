@@ -235,15 +235,16 @@ class Task extends Model
         });
     }
 
-    public function complete($plannedAt = null)
+    public function complete($plannedAt = null, ?User $by = null)
     {
         $timezone = $this->recurrence_timezone ?: config('app.timezone', 'UTC');
         $plannedAt = $plannedAt ? Carbon::parse($plannedAt, $timezone)->setTimezone('UTC') : ($this->due_at ?: now());
 
         // Jede Erledigung landet in der Historie, auch die einer einmaligen Aufgabe.
+        // Ohne ausdrueckliche Angabe gilt der Besitzer als Erlediger.
         $this->completions()->updateOrCreate(
             ['planned_at' => $plannedAt],
-            ['completed_at' => now(), 'is_skipped' => false]
+            ['completed_at' => now(), 'is_skipped' => false, 'completed_by' => $by?->id ?? $this->user_id]
         );
 
         if ($this->isRecurring()) {

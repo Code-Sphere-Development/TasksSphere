@@ -2,6 +2,7 @@
 
 use App\Models\Task;
 use App\Models\TaskCompletion;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 
@@ -512,4 +513,29 @@ test('complete on a non recurring task leaves due_at untouched', function () {
     $task->complete();
 
     expect($task->fresh()->due_at->format('Y-m-d H:i:s'))->toBe('2026-01-23 08:00:00');
+});
+
+test('complete records the task owner as the completer by default', function () {
+    $task = Task::factory()->create(['recurrence_rule' => null, 'recurrence_timezone' => null]);
+
+    $task->complete();
+
+    expect($task->completions()->first()->completed_by)->toBe($task->user_id);
+});
+
+test('complete records an explicit completer', function () {
+    $task = Task::factory()->create(['recurrence_rule' => null, 'recurrence_timezone' => null]);
+    $other = User::factory()->create();
+
+    $task->complete(null, $other);
+
+    expect($task->completions()->first()->completed_by)->toBe($other->id);
+});
+
+test('a completion knows who completed it', function () {
+    $task = Task::factory()->create(['recurrence_rule' => null, 'recurrence_timezone' => null]);
+
+    $task->complete();
+
+    expect($task->completions()->first()->completedBy->id)->toBe($task->user_id);
 });

@@ -148,7 +148,7 @@ class TaskApiController extends Controller
     public function complete(Request $request, Task $task)
     {
         $this->authorize('update', $task);
-        $task->complete($request->input('planned_at'));
+        $task->complete($request->input('planned_at'), $request->user());
 
         return response()->json(['message' => 'Task completed', 'task' => $task->fresh()]);
     }

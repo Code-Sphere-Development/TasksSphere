@@ -281,3 +281,18 @@ test('the priority is shown on the task card', function () {
         ->test(TaskManager::class)
         ->assertSee('Dringend');
 });
+
+test('completing from the dashboard records the acting user as completer', function () {
+    $owner = User::factory()->create();
+    $task = Task::factory()->create([
+        'user_id' => $owner->id,
+        'due_at' => now()->addHour(),
+        'is_archived' => false,
+    ]);
+
+    Livewire::actingAs($owner)
+        ->test(TaskManager::class)
+        ->call('completeTask', $task->id);
+
+    expect($task->completions()->first()->completed_by)->toBe($owner->id);
+});
