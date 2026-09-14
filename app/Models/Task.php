@@ -398,7 +398,10 @@ class Task extends Model
         }
 
         $tempDue = clone $current;
-        $limit = 100;
+        // Sicherheitsgrenze gegen Endlosschleifen. Die alten festen 100 haben
+        // schon bei einer stuendlichen Aufgabe ueber sieben Tage ein Drittel der
+        // Termine stillschweigend verschluckt (168 erwartet, 100 geliefert).
+        $limit = (int) config('tasks.max_occurrences_per_task', 750);
 
         // If the current due_at is before our window, it's overdue
         if ($tempDue->isBefore($start)) {

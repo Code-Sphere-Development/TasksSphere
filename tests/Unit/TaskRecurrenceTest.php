@@ -76,3 +76,28 @@ test('multiple times with larger interval', function () {
     $nextDue = $task->calculateNextDueDate();
     $this->assertEquals('2026-01-25 08:00:00', $nextDue->format('Y-m-d H:i:s'));
 });
+
+test('an hourly task yields every occurrence of the week, not just the first hundred', function () {
+    $task = new Task;
+    $task->due_at = Carbon::parse('2026-01-01 00:00:00');
+    $task->recurrence_rule = ['frequency' => 'hourly', 'interval' => 1];
+    $task->setRelation('completions', collect());
+
+    $occurrences = $task->getOccurrences('2026-01-01 00:00:00', '2026-01-07 23:59:59');
+
+    // 7 Tage stuendlich sind 168 Termine; die alte feste Grenze von 100 hat
+    // ueber ein Drittel davon stillschweigend verschluckt.
+    expect($occurrences->count())->toBeGreaterThan(160);
+});
+
+test('the occurrence cap is configurable and still bounded', function () {
+    config(['tasks.max_occurrences_per_task' => 10]);
+
+    $task = new Task;
+    $task->due_at = Carbon::parse('2026-01-01 00:00:00');
+    $task->recurrence_rule = ['frequency' => 'hourly', 'interval' => 1];
+    $task->setRelation('completions', collect());
+
+    expect($task->getOccurrences('2026-01-01 00:00:00', '2026-01-07 23:59:59')->count())
+        ->toBeLessThanOrEqual(10);
+});

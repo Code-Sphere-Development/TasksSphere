@@ -41,6 +41,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Obergrenze fuer Termine je Aufgabe
+    |--------------------------------------------------------------------------
+    |
+    | Schutz gegen Endlosschleifen beim Aufloesen einer Wiederholung. Muss gross
+    | genug sein fuer das groesste Fenster, das die Oberflaeche anfragt - ein
+    | Monat stuendlich waeren rund 720 Termine.
+    |
+    */
+
+    'max_occurrences_per_task' => (int) env('TASKS_MAX_OCCURRENCES_PER_TASK', 750),
+
+    /*
+    |--------------------------------------------------------------------------
     | Personenverzeichnis
     |--------------------------------------------------------------------------
     |
