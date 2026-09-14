@@ -237,19 +237,20 @@ class Task extends Model
         $timezone = $this->recurrence_timezone ?: config('app.timezone', 'UTC');
         $plannedAt = $plannedAt ? Carbon::parse($plannedAt, $timezone)->setTimezone('UTC') : ($this->due_at ?: now());
 
-        if ($this->isRecurring()) {
-            $this->completions()->updateOrCreate(
-                ['planned_at' => $plannedAt],
-                ['completed_at' => now(), 'is_skipped' => false]
-            );
+        // Jede Erledigung landet in der Historie, auch die einer einmaligen Aufgabe.
+        $this->completions()->updateOrCreate(
+            ['planned_at' => $plannedAt],
+            ['completed_at' => now(), 'is_skipped' => false]
+        );
 
+        if ($this->isRecurring()) {
             // Update due_at to the next uncompleted occurrence
             $this->due_at = $this->calculateNextDueDate($plannedAt);
-            $this->save();
         } else {
             $this->completed_at = now();
-            $this->save();
         }
+
+        $this->save();
     }
 
     public function skip($plannedAt)

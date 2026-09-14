@@ -206,3 +206,23 @@ test('completing a task from the detail closes the detail', function () {
 
     expect($task->fresh()->completed_at)->not->toBeNull();
 });
+
+test('a completed one off task appears under recently completed', function () {
+    $user = User::factory()->create();
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'title' => 'Einmalige Aufgabe',
+        'due_at' => now()->addHour(),
+        'recurrence_rule' => null,
+        'is_archived' => false,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->call('completeTask', $task->id);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->assertViewHas('completedCompletions', fn ($completions) => $completions->contains('task_id', $task->id))
+        ->assertSee('Einmalige Aufgabe');
+});

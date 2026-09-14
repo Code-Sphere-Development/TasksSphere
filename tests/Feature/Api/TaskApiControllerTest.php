@@ -444,3 +444,21 @@ test('update converts due_at using recurrence timezone to UTC', function () {
 
     expect($task->fresh()->getRawOriginal('due_at'))->toBe('2026-03-01 09:00:00');
 });
+
+test('completed lists a one off task that was completed through the api', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $task = Task::factory()->for($user)->create([
+        'recurrence_rule' => null,
+        'due_at' => now()->addHour(),
+        'completed_at' => null,
+        'is_archived' => false,
+    ]);
+
+    $this->postJson("/api/tasks/{$task->id}/complete")->assertOk();
+
+    $this->getJson('/api/tasks/completed')
+        ->assertOk()
+        ->assertJsonPath('0.task_id', $task->id);
+});

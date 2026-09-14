@@ -107,8 +107,6 @@ test('complete on a non recurring task sets completed_at and persists', function
 
     expect($task->completed_at)->not->toBeNull();
     expect($task->fresh()->completed_at)->not->toBeNull();
-    // Non recurring tasks never create completion rows.
-    expect($task->completions()->count())->toBe(0);
 });
 
 test('complete on a recurring task records a completion and advances due_at', function () {
@@ -456,4 +454,62 @@ test('timezone accessors leave the value untouched without a recurrence timezone
     $due = $task->fresh()->due_at;
 
     expect($due->format('Y-m-d H:i:s'))->toBe('2026-01-15 08:00:00');
+});
+
+test('complete on a non recurring task records a completion for the history', function () {
+    $task = Task::factory()->create([
+        'recurrence_rule' => null,
+        'due_at' => '2026-01-23 08:00:00',
+        'completed_at' => null,
+        'recurrence_timezone' => null,
+    ]);
+
+    $task->complete();
+
+    $completion = $task->completions()->first();
+    expect($completion)->not->toBeNull();
+    expect($completion->planned_at->format('Y-m-d H:i:s'))->toBe('2026-01-23 08:00:00');
+    expect($completion->completed_at)->not->toBeNull();
+    expect($completion->is_skipped)->toBeFalse();
+});
+
+test('complete on a non recurring task without a due date still records a completion', function () {
+    $task = Task::factory()->create([
+        'recurrence_rule' => null,
+        'due_at' => null,
+        'completed_at' => null,
+        'recurrence_timezone' => null,
+    ]);
+
+    $task->complete();
+
+    expect($task->completions()->count())->toBe(1);
+    expect($task->fresh()->completed_at)->not->toBeNull();
+});
+
+test('completing a non recurring task twice does not duplicate its completion', function () {
+    $task = Task::factory()->create([
+        'recurrence_rule' => null,
+        'due_at' => '2026-01-23 08:00:00',
+        'completed_at' => null,
+        'recurrence_timezone' => null,
+    ]);
+
+    $task->complete();
+    $task->complete();
+
+    expect($task->completions()->count())->toBe(1);
+});
+
+test('complete on a non recurring task leaves due_at untouched', function () {
+    $task = Task::factory()->create([
+        'recurrence_rule' => null,
+        'due_at' => '2026-01-23 08:00:00',
+        'completed_at' => null,
+        'recurrence_timezone' => null,
+    ]);
+
+    $task->complete();
+
+    expect($task->fresh()->due_at->format('Y-m-d H:i:s'))->toBe('2026-01-23 08:00:00');
 });
