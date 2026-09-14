@@ -62,6 +62,16 @@
                         </div>
 
                         <div>
+                            <label for="priority" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Priorität') }}</label>
+                            <select id="priority" wire:model="priority" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
+                                <option value="">{{ __('Keine Priorität') }}</option>
+                                @foreach(\App\Enums\TaskPriority::cases() as $case)
+                                    <option value="{{ $case->value }}">{{ $case->label() }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
                             <div>
                                 <label for="frequency" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Wiederholung') }}</label>
                                 <select id="frequency" wire:model.live="frequency" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
@@ -211,6 +221,11 @@
                                                             <h3 class="text-base font-bold text-gray-900 dark:text-white truncate">
                                                                 {{ $task->title }}
                                                             </h3>
+                                                            @if($task->priority)
+                                                                <span class="flex-shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md border {{ $task->priority->badgeClasses() }}">
+                                                                    {{ $task->priority->label() }}
+                                                                </span>
+                                                            @endif
                                                             @if($task->source && $task->source !== \App\Enums\TaskSource::Manual)
                                                                 <span class="flex-shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
                                                                     {{ $task->source->label() }}

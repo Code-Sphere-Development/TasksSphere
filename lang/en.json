@@ -89,5 +89,12 @@
     "Details anzeigen": "Show details",
     "Liste": "List",
     "Erledigen": "Complete",
-    "Bearbeiten": "Edit"
+    "Bearbeiten": "Edit",
+    "Dringend": "Urgent",
+    "Hoch": "High",
+    "Mittel": "Medium",
+    "Niedrig": "Low",
+    "Priorität": "Priority",
+    "Keine Priorität": "No priority",
+    "Alle Prioritäten": "All priorities"
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\TaskPriority;
 use App\Livewire\TaskManager;
 use App\Models\Task;
 use App\Models\TaskCompletion;
@@ -225,4 +226,58 @@ test('a completed one off task appears under recently completed', function () {
         ->test(TaskManager::class)
         ->assertViewHas('completedCompletions', fn ($completions) => $completions->contains('task_id', $task->id))
         ->assertSee('Einmalige Aufgabe');
+});
+
+test('a task can be created with a priority', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->set('title', 'Steuer')
+        ->set('priority', TaskPriority::Urgent->value)
+        ->call('createTask');
+
+    expect($user->tasks()->first()->priority)->toBe(TaskPriority::Urgent);
+});
+
+test('editing a task prefills its priority', function () {
+    $user = User::factory()->create();
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'priority' => TaskPriority::High,
+        'is_archived' => false,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->call('editTask', $task->id)
+        ->assertSet('priority', TaskPriority::High->value);
+});
+
+test('a task can be created without a priority', function () {
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->set('title', 'Ohne Prioritaet')
+        ->call('createTask');
+
+    expect($user->tasks()->first()->priority)->toBeNull();
+});
+
+test('the priority is shown on the task card', function () {
+    app()->setLocale('de');
+
+    $user = User::factory()->create();
+    Task::factory()->create([
+        'user_id' => $user->id,
+        'title' => 'Steuer',
+        'priority' => TaskPriority::Urgent,
+        'due_at' => now()->addHour(),
+        'is_archived' => false,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->assertSee('Dringend');
 });

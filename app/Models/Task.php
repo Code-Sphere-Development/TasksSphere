@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TaskPriority;
 use App\Enums\TaskSource;
 use Database\Factories\TaskFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -21,6 +22,7 @@ class Task extends Model
         'task_list_id',
         'title',
         'description',
+        'priority',
         'due_at',
         'completed_at',
         'is_active',
@@ -39,6 +41,7 @@ class Task extends Model
         'is_archived' => 'boolean',
         'recurrence_rule' => 'array',
         'source' => TaskSource::class,
+        'priority' => TaskPriority::class,
     ];
 
     public function user()

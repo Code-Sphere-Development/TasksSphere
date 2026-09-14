@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\TaskPriority;
 use App\Enums\TaskSource;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
@@ -64,6 +65,7 @@ class TaskApiController extends Controller
             'title' => 'required|string|max:255',
             'source' => ['nullable', Rule::enum(TaskSource::class)],
             'description' => 'nullable|string',
+            'priority' => ['nullable', 'integer', Rule::enum(TaskPriority::class)],
             'due_at' => 'nullable|date',
             'recurrence_rule' => 'nullable|array',
             'recurrence_rule.frequency' => 'nullable|in:hourly,daily,weekly,monthly',
@@ -111,6 +113,7 @@ class TaskApiController extends Controller
         $validated = $request->validate([
             'title' => 'string|max:255',
             'description' => 'nullable|string',
+            'priority' => ['nullable', 'integer', Rule::enum(TaskPriority::class)],
             'due_at' => 'nullable|date',
             'recurrence_rule' => 'nullable|array',
             'recurrence_rule.frequency' => 'nullable|in:hourly,daily,weekly,monthly',

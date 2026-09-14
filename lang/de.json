@@ -87,5 +87,12 @@
     "Details anzeigen": "Details anzeigen",
     "Liste": "Liste",
     "Erledigen": "Erledigen",
-    "Bearbeiten": "Bearbeiten"
+    "Bearbeiten": "Bearbeiten",
+    "Dringend": "Dringend",
+    "Hoch": "Hoch",
+    "Mittel": "Mittel",
+    "Niedrig": "Niedrig",
+    "Priorität": "Priorität",
+    "Keine Priorität": "Keine Priorität",
+    "Alle Prioritäten": "Alle Prioritäten"
 }

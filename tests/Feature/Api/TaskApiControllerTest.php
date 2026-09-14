@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\TaskPriority;
 use App\Models\Task;
 use App\Models\TaskCompletion;
 use App\Models\TaskList;
@@ -501,4 +502,42 @@ test('update accepts a task list owned by the user', function () {
     $this->putJson("/api/tasks/{$task->id}", ['task_list_id' => $ownList->id])->assertOk();
 
     expect($task->fresh()->task_list_id)->toBe($ownList->id);
+});
+
+test('store accepts a priority', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $this->postJson('/api/tasks', ['title' => 'Mit Prioritaet', 'priority' => 1])->assertCreated();
+
+    expect($user->tasks()->first()->priority)->toBe(TaskPriority::Urgent);
+});
+
+test('store still works without a priority', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $this->postJson('/api/tasks', ['title' => 'Ohne Prioritaet'])->assertCreated();
+
+    expect($user->tasks()->first()->priority)->toBeNull();
+});
+
+test('store rejects a priority outside the scale', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $this->postJson('/api/tasks', ['title' => 'Ungueltig', 'priority' => 9])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('priority');
+});
+
+test('update can clear the priority', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $task = Task::factory()->for($user)->create(['priority' => TaskPriority::High]);
+
+    $this->putJson("/api/tasks/{$task->id}", ['priority' => null])->assertOk();
+
+    expect($task->fresh()->priority)->toBeNull();
 });

@@ -17,6 +17,8 @@ class TaskManager extends Component
 
     public $description;
 
+    public $priority = '';
+
     public $due_at;
 
     public $frequency = 'none';
@@ -50,6 +52,7 @@ class TaskManager extends Component
     protected $rules = [
         'title' => 'required|string|max:255',
         'description' => 'nullable|string',
+        'priority' => 'nullable|integer|in:1,2,3,4',
         'due_at' => 'nullable|date',
         'frequency' => 'required|in:none,hourly,daily,weekly,monthly',
         'interval' => 'required|integer|min:1',
@@ -176,13 +179,14 @@ class TaskManager extends Component
         Auth::user()->tasks()->create([
             'title' => $this->title,
             'description' => $this->description,
+            'priority' => $this->priority !== '' ? (int) $this->priority : null,
             'due_at' => $dueAt,
             'recurrence_rule' => $recurrence_rule,
             'recurrence_timezone' => $this->recurrence_timezone,
             'source' => TaskSource::Manual,
         ]);
 
-        $this->reset(['title', 'description', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'showForm']);
+        $this->reset(['title', 'description', 'priority', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'showForm']);
     }
 
     public function editTask($taskId): void
@@ -191,6 +195,7 @@ class TaskManager extends Component
         $this->editingTask = $task;
         $this->title = $task->title;
         $this->description = $task->description;
+        $this->priority = $task->priority?->value ?? '';
         $this->due_at = $task->due_at ? $task->due_at->format('Y-m-d\TH:i') : null;
 
         if ($task->isRecurring()) {
@@ -231,6 +236,7 @@ class TaskManager extends Component
         $task->update([
             'title' => $this->title,
             'description' => $this->description,
+            'priority' => $this->priority !== '' ? (int) $this->priority : null,
             'due_at' => $dueAt,
             'recurrence_rule' => $recurrence_rule,
             'recurrence_timezone' => $this->recurrence_timezone,
@@ -241,7 +247,7 @@ class TaskManager extends Component
 
     public function cancelEdit(): void
     {
-        $this->reset(['title', 'description', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'isEditing', 'editingTask', 'showForm']);
+        $this->reset(['title', 'description', 'priority', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'isEditing', 'editingTask', 'showForm']);
     }
 
     public function completeTask($taskId, $plannedAt = null): void
