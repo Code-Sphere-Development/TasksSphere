@@ -11,15 +11,7 @@ class TaskListApiController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
-        $teamId = $user->currentTeam?->id;
-
-        return TaskList::where(function ($q) use ($user, $teamId) {
-            $q->where('user_id', $user->id);
-            if ($teamId) {
-                $q->orWhere('team_id', $teamId);
-            }
-        })->orderBy('position')->get();
+        return TaskList::forUser(Auth::id())->orderBy('position')->get();
     }
 
     public function store(Request $request)
@@ -36,7 +28,6 @@ class TaskListApiController extends Controller
         ]);
 
         $validated['user_id'] = Auth::id();
-        $validated['team_id'] = null;
 
         return TaskList::create($validated);
     }

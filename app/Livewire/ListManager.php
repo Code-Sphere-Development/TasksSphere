@@ -34,15 +34,10 @@ class ListManager extends Component
 
     public function render()
     {
-        $user = Auth::user();
-        $teamId = $user->currentTeam?->id;
-
-        $myLists = TaskList::forUser($user->id)->orderBy('position')->get();
-        $teamLists = $teamId ? TaskList::forTeam($teamId)->orderBy('position')->get() : collect();
+        $myLists = TaskList::forUser(Auth::id())->orderBy('position')->get();
 
         return view('livewire.list-manager', [
             'myLists' => $myLists,
-            'teamLists' => $teamLists,
         ])->layout('layouts.app');
     }
 
@@ -62,20 +57,6 @@ class ListManager extends Component
             'icon' => $this->icon ?: null,
             'color' => $this->color ?: null,
             'user_id' => Auth::id(),
-        ]);
-        $this->resetForm();
-    }
-
-    public function createTeamList(): void
-    {
-        $this->validate();
-        TaskList::create([
-            'title' => $this->title,
-            'description' => $this->description,
-            'type' => $this->type,
-            'icon' => $this->icon ?: null,
-            'color' => $this->color ?: null,
-            'team_id' => Auth::user()->currentTeam?->id,
         ]);
         $this->resetForm();
     }

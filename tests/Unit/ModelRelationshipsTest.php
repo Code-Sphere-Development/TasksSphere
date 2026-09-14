@@ -48,29 +48,17 @@ test('task list has tasks', function () {
 // TaskList — scopes
 // ---------------------------------------------------------------------------
 
-test('forUser scope returns only personal lists for the user', function () {
+test('forUser scope returns only lists of that user', function () {
     $user = User::factory()->create();
     $other = User::factory()->create();
 
-    $personal = TaskList::factory()->create(['user_id' => $user->id, 'team_id' => null]);
-    // Same user but assigned to a team must be excluded (whereNull team_id).
-    TaskList::factory()->create(['user_id' => $user->id, 'team_id' => 5]);
-    TaskList::factory()->create(['user_id' => $other->id, 'team_id' => null]);
+    $mine = TaskList::factory()->create(['user_id' => $user->id]);
+    TaskList::factory()->create(['user_id' => $other->id]);
 
     $result = TaskList::forUser($user->id)->get();
 
     expect($result)->toHaveCount(1);
-    expect($result->first()->id)->toBe($personal->id);
-});
-
-test('forTeam scope returns only lists for the team', function () {
-    $inTeam = TaskList::factory()->create(['team_id' => 7]);
-    TaskList::factory()->create(['team_id' => 8]);
-
-    $result = TaskList::forTeam(7)->get();
-
-    expect($result)->toHaveCount(1);
-    expect($result->first()->id)->toBe($inTeam->id);
+    expect($result->first()->id)->toBe($mine->id);
 });
 
 test('ofType scope filters by list type', function () {

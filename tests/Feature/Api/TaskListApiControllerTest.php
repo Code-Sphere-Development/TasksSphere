@@ -75,7 +75,6 @@ test('store creates a personal checklist for the authenticated user', function (
         'title' => 'Groceries',
         'type' => 'checklist',
         'user_id' => $user->id,
-        'team_id' => null,
     ]);
 
     $this->assertDatabaseHas('task_lists', [

@@ -107,11 +107,6 @@
                         <button type="button" wire:click="resetForm" class="inline-flex items-center justify-center px-8 py-3 border border-gray-300 dark:border-gray-600 text-base font-bold rounded-xl shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all">
                             {{ __('Abbrechen') }}
                         </button>
-                        @if(!$isEditing && Auth::user()->currentTeam)
-                            <button type="button" wire:click="createTeamList" class="inline-flex items-center justify-center px-8 py-3 border border-blue-300 dark:border-blue-700 text-base font-bold rounded-xl shadow-sm text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all">
-                                {{ __('Als Team-Liste') }}
-                            </button>
-                        @endif
                         <button type="submit" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-xl shadow-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform hover:-translate-y-0.5">
                             {{ $isEditing ? __('Änderungen speichern') : __('Liste erstellen') }}
                         </button>
@@ -177,62 +172,5 @@
             @endif
         </section>
 
-        <!-- Team Lists -->
-        @if(Auth::user()->currentTeam)
-        <section>
-            <h2 class="text-sm font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 flex items-center px-2 mb-4">
-                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 mr-2"></span>
-                {{ __('Team-Listen') }}
-                <span class="ml-2 px-2 py-0.5 text-xs bg-indigo-100 dark:bg-indigo-900/30 rounded-full font-bold">
-                    {{ $teamLists->count() }}
-                </span>
-            </h2>
-
-            @if($teamLists->count() > 0)
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    @foreach($teamLists as $list)
-                        <div class="group bg-white dark:bg-gray-800 shadow-sm hover:shadow-md rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700 transition-all" style="border-left: 4px solid {{ $list->color ?? '#6366F1' }}">
-                            <a href="{{ route('lists.show', $list) }}" wire:navigate class="block p-5">
-                                <div class="flex items-start justify-between">
-                                    <div class="flex items-center space-x-3 min-w-0">
-                                        @if($list->icon)
-                                            <span class="text-2xl flex-shrink-0">{!! $list->icon !!}</span>
-                                        @else
-                                            <span class="flex-shrink-0 bg-gray-100 dark:bg-gray-700 w-10 h-10 rounded-lg flex items-center justify-center">
-                                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                            </span>
-                                        @endif
-                                        <div class="min-w-0">
-                                            <h3 class="text-base font-bold text-gray-900 dark:text-white truncate">{{ $list->title }}</h3>
-                                            @if($list->description)
-                                                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $list->description }}</p>
-                                            @endif
-                                        </div>
-                                    </div>
-                                    <span class="ml-2 flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                                        {{ $list->itemCount() }}
-                                    </span>
-                                </div>
-                            </a>
-                            <div class="flex items-center justify-end px-5 pb-3 -mt-1 space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button wire:click="editList({{ $list->id }})" class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                </button>
-                                <button wire:click="deleteList({{ $list->id }})" wire:confirm="{{ __('Liste wirklich löschen?') }}" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                </button>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-3xl border-2 border-dashed border-gray-100 dark:border-gray-700 shadow-sm">
-                    <div class="text-4xl mb-3">&#128101;</div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ __('Keine Team-Listen') }}</h3>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Erstelle eine Liste und teile sie mit deinem Team.') }}</p>
-                </div>
-            @endif
-        </section>
-        @endif
     </div>
 </div>

@@ -13,7 +13,7 @@ class TaskList extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'user_id', 'team_id', 'title', 'description', 'type', 'icon', 'color', 'position',
+        'user_id', 'title', 'description', 'type', 'icon', 'color', 'position',
     ];
 
     protected $casts = [
@@ -23,11 +23,6 @@ class TaskList extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class);
     }
 
     public function items(): HasMany
@@ -42,12 +37,7 @@ class TaskList extends Model
 
     public function scopeForUser($query, int $userId)
     {
-        return $query->where('user_id', $userId)->whereNull('team_id');
-    }
-
-    public function scopeForTeam($query, int $teamId)
-    {
-        return $query->where('team_id', $teamId);
+        return $query->where('user_id', $userId);
     }
 
     public function scopeOfType($query, string $type)

@@ -35,22 +35,21 @@ test('render only shows lists belonging to the current user', function () {
     $user = User::factory()->create();
     $other = User::factory()->create();
 
-    $mine = TaskList::factory()->create(['user_id' => $user->id, 'team_id' => null]);
-    $theirs = TaskList::factory()->create(['user_id' => $other->id, 'team_id' => null]);
+    $mine = TaskList::factory()->create(['user_id' => $user->id]);
+    $theirs = TaskList::factory()->create(['user_id' => $other->id]);
 
     $this->actingAs($user);
 
     Livewire::test(ListManager::class)
         ->assertViewHas('myLists', fn ($lists) => $lists->contains('id', $mine->id)
-            && ! $lists->contains('id', $theirs->id))
-        ->assertViewHas('teamLists', fn ($lists) => $lists->isEmpty());
+            && ! $lists->contains('id', $theirs->id));
 });
 
 test('render orders my lists by position', function () {
     $user = User::factory()->create();
 
-    $second = TaskList::factory()->create(['user_id' => $user->id, 'team_id' => null, 'position' => 5]);
-    $first = TaskList::factory()->create(['user_id' => $user->id, 'team_id' => null, 'position' => 1]);
+    $second = TaskList::factory()->create(['user_id' => $user->id, 'position' => 5]);
+    $first = TaskList::factory()->create(['user_id' => $user->id, 'position' => 1]);
 
     $this->actingAs($user);
 
@@ -109,7 +108,6 @@ test('createList persists a list for the current user and resets the form', func
         'icon' => 'cart',
         'color' => '#ff0000',
         'user_id' => $user->id,
-        'team_id' => null,
     ]);
 });
 
@@ -183,45 +181,6 @@ test('createList fails validation for a color longer than 7 characters', functio
 
 /*
 |--------------------------------------------------------------------------
-| createTeamList
-|--------------------------------------------------------------------------
-| Team features are disabled in this app and the User model has no
-| currentTeam relationship, so Auth::user()->currentTeam?->id resolves to
-| null. createTeamList therefore creates an orphan list (team_id null and
-| user_id unset). This asserts the current behavior; see report.
-*/
-
-test('createTeamList creates an orphan list when no current team exists', function () {
-    $user = User::factory()->create();
-    $this->actingAs($user);
-
-    Livewire::test(ListManager::class)
-        ->set('title', 'Team list')
-        ->set('type', 'checklist')
-        ->call('createTeamList')
-        ->assertSet('title', '');
-
-    $this->assertDatabaseHas('task_lists', [
-        'title' => 'Team list',
-        'team_id' => null,
-        'user_id' => null,
-    ]);
-});
-
-test('createTeamList still validates the title', function () {
-    $user = User::factory()->create();
-    $this->actingAs($user);
-
-    Livewire::test(ListManager::class)
-        ->set('title', '')
-        ->call('createTeamList')
-        ->assertHasErrors(['title' => 'required']);
-
-    expect(TaskList::count())->toBe(0);
-});
-
-/*
-|--------------------------------------------------------------------------
 | editList
 |--------------------------------------------------------------------------
 */
@@ -230,7 +189,6 @@ test('editList loads the list into the form', function () {
     $user = User::factory()->create();
     $list = TaskList::factory()->create([
         'user_id' => $user->id,
-        'team_id' => null,
         'title' => 'Original',
         'description' => 'Original description',
         'type' => 'tasks',
@@ -256,7 +214,6 @@ test('editList coalesces null icon and color to empty strings', function () {
     $user = User::factory()->create();
     $list = TaskList::factory()->create([
         'user_id' => $user->id,
-        'team_id' => null,
         'icon' => null,
         'color' => null,
     ]);
@@ -283,7 +240,7 @@ test('editList is denied for another users list', function () {
     // list was never loaded into the component.
     $user = User::factory()->create();
     $other = User::factory()->create();
-    $list = TaskList::factory()->create(['user_id' => $other->id, 'team_id' => null]);
+    $list = TaskList::factory()->create(['user_id' => $other->id]);
 
     $this->actingAs($user);
 
@@ -304,7 +261,6 @@ test('updateList updates the editable fields and resets the form', function () {
     $user = User::factory()->create();
     $list = TaskList::factory()->create([
         'user_id' => $user->id,
-        'team_id' => null,
         'title' => 'Old',
         'description' => 'Old desc',
         'icon' => 'old',
@@ -337,7 +293,6 @@ test('updateList changes the list type', function () {
     $user = User::factory()->create();
     $list = TaskList::factory()->create([
         'user_id' => $user->id,
-        'team_id' => null,
         'type' => 'checklist',
     ]);
 
@@ -356,7 +311,6 @@ test('updateList stores empty icon and color as null', function () {
     $user = User::factory()->create();
     $list = TaskList::factory()->create([
         'user_id' => $user->id,
-        'team_id' => null,
         'icon' => 'x',
         'color' => '#abcdef',
     ]);
@@ -379,7 +333,6 @@ test('updateList fails validation when title is empty', function () {
     $user = User::factory()->create();
     $list = TaskList::factory()->create([
         'user_id' => $user->id,
-        'team_id' => null,
         'title' => 'Keep me',
     ]);
 
@@ -399,7 +352,6 @@ test('updateList is denied for another users list', function () {
     $other = User::factory()->create();
     $list = TaskList::factory()->create([
         'user_id' => $other->id,
-        'team_id' => null,
         'title' => 'Not mine',
     ]);
 
@@ -423,7 +375,7 @@ test('updateList is denied for another users list', function () {
 
 test('deleteList soft deletes the users own list', function () {
     $user = User::factory()->create();
-    $list = TaskList::factory()->create(['user_id' => $user->id, 'team_id' => null]);
+    $list = TaskList::factory()->create(['user_id' => $user->id]);
 
     $this->actingAs($user);
 
@@ -444,7 +396,7 @@ test('deleteList throws when the list does not exist', function () {
 test('deleteList is denied for another users list', function () {
     $user = User::factory()->create();
     $other = User::factory()->create();
-    $list = TaskList::factory()->create(['user_id' => $other->id, 'team_id' => null]);
+    $list = TaskList::factory()->create(['user_id' => $other->id]);
 
     $this->actingAs($user);
 

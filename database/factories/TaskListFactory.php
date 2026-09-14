@@ -18,7 +18,6 @@ class TaskListFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'team_id' => null,
             'title' => $this->faker->words(2, true),
             'description' => $this->faker->optional()->sentence(),
             'type' => 'checklist',

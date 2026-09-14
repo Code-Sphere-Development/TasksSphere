@@ -14,9 +14,6 @@ class TaskListPolicy
 
     public function view(User $user, TaskList $taskList): bool
     {
-        // Team support is not wired up (no Team model / HasTeams trait),
-        // so access is granted to the owner only. Team-scoped lists fall
-        // through to a safe deny instead of crashing on the missing Team.
         return $taskList->user_id === $user->id;
     }
 
