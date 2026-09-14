@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\TaskRotation;
 use App\Enums\TaskSource;
 use App\Models\Task;
 use App\Models\TaskCompletion;
@@ -24,6 +25,10 @@ class TaskManager extends Component
     public $priority = '';
 
     public $assigned_to = '';
+
+    public array $assignees = [];
+
+    public $rotation_strategy = '';
 
     public $due_at;
 
@@ -66,12 +71,29 @@ class TaskManager extends Component
             'description' => 'nullable|string',
             'priority' => 'nullable|integer|in:1,2,3,4',
             'assigned_to' => ['nullable', 'integer', Rule::in($this->assignablePeople()->pluck('id'))],
+            'assignees' => 'array',
+            'assignees.*' => ['integer', Rule::in($this->assignablePeople()->pluck('id'))],
+            'rotation_strategy' => ['nullable', Rule::enum(TaskRotation::class)],
             'due_at' => 'nullable|date',
             'frequency' => 'required|in:none,hourly,daily,weekly,monthly',
             'interval' => 'required|integer|min:1',
             'weekdays' => 'nullable|array',
             'recurrence_timezone' => 'required|string|timezone',
         ];
+    }
+
+    /**
+     * Der Kreis wird gesetzt, nicht ergaenzt - sonst liessen sich Personen nie
+     * wieder herausnehmen. assignTo() fuegt die zustaendige Person danach
+     * ohnehin wieder hinzu.
+     */
+    private function syncAssignees(Task $task): void
+    {
+        $task->assignees()->sync(
+            collect($this->assignees)
+                ->mapWithKeys(fn ($id) => [(int) $id => ['assigned_by' => Auth::id()]])
+                ->all()
+        );
     }
 
     private function assignablePeople(): Collection
@@ -205,14 +227,17 @@ class TaskManager extends Component
             'due_at' => $dueAt,
             'recurrence_rule' => $recurrence_rule,
             'recurrence_timezone' => $this->recurrence_timezone,
+            'rotation_strategy' => $this->rotation_strategy ?: null,
             'source' => TaskSource::Manual,
         ]);
+
+        $this->syncAssignees($task);
 
         if ($this->assigned_to !== '') {
             $task->assignTo(User::findOrFail((int) $this->assigned_to), Auth::user());
         }
 
-        $this->reset(['title', 'description', 'priority', 'assigned_to', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'showForm']);
+        $this->reset(['title', 'description', 'priority', 'assigned_to', 'assignees', 'rotation_strategy', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'showForm']);
     }
 
     public function editTask($taskId): void
@@ -223,6 +248,8 @@ class TaskManager extends Component
         $this->description = $task->description;
         $this->priority = $task->priority?->value ?? '';
         $this->assigned_to = $task->assigned_to ?? '';
+        $this->assignees = $task->assignees->pluck('id')->all();
+        $this->rotation_strategy = $task->rotation_strategy?->value ?? '';
         $this->due_at = $task->due_at ? $task->due_at->format('Y-m-d\TH:i') : null;
 
         if ($task->isRecurring()) {
@@ -267,7 +294,10 @@ class TaskManager extends Component
             'due_at' => $dueAt,
             'recurrence_rule' => $recurrence_rule,
             'recurrence_timezone' => $this->recurrence_timezone,
+            'rotation_strategy' => $this->rotation_strategy ?: null,
         ]);
+
+        $this->syncAssignees($task);
 
         if ($this->assigned_to !== '') {
             $task->assignTo(User::findOrFail((int) $this->assigned_to), Auth::user());
@@ -280,7 +310,7 @@ class TaskManager extends Component
 
     public function cancelEdit(): void
     {
-        $this->reset(['title', 'description', 'priority', 'assigned_to', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'isEditing', 'editingTask', 'showForm']);
+        $this->reset(['title', 'description', 'priority', 'assigned_to', 'assignees', 'rotation_strategy', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'isEditing', 'editingTask', 'showForm']);
     }
 
     public function completeTask($taskId, $plannedAt = null): void

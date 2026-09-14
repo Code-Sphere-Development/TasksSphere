@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TaskPriority;
+use App\Enums\TaskRotation;
 use App\Enums\TaskSource;
 use Database\Factories\TaskFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -20,6 +21,7 @@ class Task extends Model
     protected $fillable = [
         'user_id',
         'assigned_to',
+        'rotation_strategy',
         'task_list_id',
         'title',
         'description',
@@ -43,6 +45,7 @@ class Task extends Model
         'recurrence_rule' => 'array',
         'source' => TaskSource::class,
         'priority' => TaskPriority::class,
+        'rotation_strategy' => TaskRotation::class,
     ];
 
     public function user()
@@ -216,6 +219,31 @@ class Task extends Model
     }
 
     /**
+     * Bestimmt nach einer Erledigung die naechste zustaendige Person.
+     *
+     * Nur fuer wiederkehrende Aufgaben sinnvoll - eine einmalige ist danach
+     * erledigt. Ohne Strategie oder ohne Kreis bleibt alles, wie es ist.
+     */
+    protected function rotateResponsibility(): void
+    {
+        if (! $this->rotation_strategy) {
+            return;
+        }
+
+        $candidates = $this->assignees()->get();
+
+        if ($candidates->isEmpty()) {
+            return;
+        }
+
+        $next = $this->rotation_strategy->strategy()->next($this, $candidates);
+
+        if ($next) {
+            $this->assigned_to = $next->id;
+        }
+    }
+
+    /**
      * ISO-Wochentage (1 = Mo) als lokalisierte Kurznamen in Kalenderreihenfolge.
      */
     protected function weekdayList(array $weekdays): string
@@ -299,6 +327,7 @@ class Task extends Model
         if ($this->isRecurring()) {
             // Update due_at to the next uncompleted occurrence
             $this->due_at = $this->calculateNextDueDate($plannedAt);
+            $this->rotateResponsibility();
         } else {
             $this->completed_at = now();
         }

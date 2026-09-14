@@ -62,6 +62,29 @@
                         </div>
 
                         @if($assignablePeople->count() > 1)
+                            <div class="md:col-span-2">
+                                <span class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Kreis') }}</span>
+                                <p class="text-xs text-gray-400">{{ __('Wer diese Aufgabe übernehmen kann.') }}</p>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    @foreach($assignablePeople as $person)
+                                        <label class="inline-flex items-center px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 cursor-pointer">
+                                            <input type="checkbox" value="{{ $person->id }}" wire:model="assignees" class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $person->name }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="rotation_strategy" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Wechsel') }}</label>
+                                <select id="rotation_strategy" wire:model="rotation_strategy" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
+                                    <option value="">{{ __('Kein Wechsel') }}</option>
+                                    @foreach(\App\Enums\TaskRotation::cases() as $case)
+                                        <option value="{{ $case->value }}">{{ $case->label() }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                             <div>
                                 <label for="assigned_to" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Zuständig') }}</label>
                                 <select id="assigned_to" wire:model="assigned_to" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">

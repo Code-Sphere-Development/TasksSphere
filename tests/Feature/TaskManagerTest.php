@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\TaskPriority;
+use App\Enums\TaskRotation;
 use App\Livewire\TaskManager;
 use App\Models\Household;
 use App\Models\Task;
@@ -380,4 +381,72 @@ test('the assignable people are offered to the view', function () {
         ->test(TaskManager::class)
         ->assertViewHas('assignablePeople', fn ($people) => $people->contains('id', $member->id)
             && ! $people->contains('id', $stranger->id));
+});
+
+test('a task can be created with a circle and a rotation strategy', function () {
+    $owner = User::factory()->create();
+    $a = User::factory()->create();
+    $b = User::factory()->create();
+    $household = Household::createFor($owner, 'Familie');
+    $household->addMember($a);
+    $household->addMember($b);
+
+    Livewire::actingAs($owner)
+        ->test(TaskManager::class)
+        ->set('title', 'Muell')
+        ->set('assignees', [$a->id, $b->id])
+        ->set('rotation_strategy', TaskRotation::LeastCompleted->value)
+        ->call('createTask');
+
+    $task = $owner->tasks()->first();
+    expect($task->assignees->pluck('id')->sort()->values()->all())->toBe(collect([$a->id, $b->id])->sort()->values()->all());
+    expect($task->rotation_strategy)->toBe(TaskRotation::LeastCompleted);
+});
+
+test('the circle cannot contain someone outside my households', function () {
+    $owner = User::factory()->create();
+    $stranger = User::factory()->create();
+
+    Livewire::actingAs($owner)
+        ->test(TaskManager::class)
+        ->set('title', 'Muell')
+        ->set('assignees', [$stranger->id])
+        ->call('createTask')
+        ->assertHasErrors('assignees.0');
+});
+
+test('editing a task prefills the circle and the rotation strategy', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    Household::createFor($owner, 'Familie')->addMember($member);
+    $task = Task::factory()->for($owner)->create([
+        'is_archived' => false,
+        'rotation_strategy' => TaskRotation::Random,
+    ]);
+    $task->assignTo($member, $owner);
+
+    Livewire::actingAs($owner)
+        ->test(TaskManager::class)
+        ->call('editTask', $task->id)
+        ->assertSet('assignees', [$member->id])
+        ->assertSet('rotation_strategy', TaskRotation::Random->value);
+});
+
+test('updating a task can shrink the circle', function () {
+    $owner = User::factory()->create();
+    $a = User::factory()->create();
+    $b = User::factory()->create();
+    $household = Household::createFor($owner, 'Familie');
+    $household->addMember($a);
+    $household->addMember($b);
+    $task = Task::factory()->for($owner)->create(['is_archived' => false]);
+    $task->assignees()->attach([$a->id, $b->id]);
+
+    Livewire::actingAs($owner)
+        ->test(TaskManager::class)
+        ->call('editTask', $task->id)
+        ->set('assignees', [$a->id])
+        ->call('updateTask');
+
+    expect($task->fresh()->assignees->pluck('id')->all())->toBe([$a->id]);
 });

@@ -116,5 +116,13 @@
     "Entfernen": "Remove",
     "Zuständig": "Responsible",
     "Niemand": "Nobody",
-    "Listen": "Lists"
+    "Listen": "Lists",
+    "Zufällig": "Random",
+    "Am seltensten zuständig": "Least assigned",
+    "Am seltensten erledigt": "Least completed",
+    "Zuständige Person bleibt": "Keep last assigned",
+    "Wechsel": "Rotation",
+    "Kein Wechsel": "No rotation",
+    "Kreis": "Circle",
+    "Wer diese Aufgabe übernehmen kann.": "Who can take on this task."
 }
