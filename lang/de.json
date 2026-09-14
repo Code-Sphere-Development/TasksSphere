@@ -126,5 +126,14 @@
     "Kalender": "Kalender",
     "Vorheriger Monat": "Vorheriger Monat",
     "Nächster Monat": "Nächster Monat",
-    "Alle Personen": "Alle Personen"
+    "Alle Personen": "Alle Personen",
+    ":count offen": ":count offen",
+    ":count erledigt": ":count erledigt",
+    "seit :days": "seit :days",
+    "Heute ist alles erledigt.": "Heute ist alles erledigt.",
+    "Für heute steht nichts an.": "Für heute steht nichts an.",
+    "Aufgabe hinzufügen": "Aufgabe hinzufügen",
+    "{1} :count überfällig|[2,*] :count überfällig": "{1} :count überfällig|[2,*] :count überfällig",
+    "Löschen": "Löschen",
+    "Diese Woche": "Diese Woche"
 }

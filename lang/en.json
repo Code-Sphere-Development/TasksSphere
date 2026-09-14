@@ -128,5 +128,14 @@
     "Kalender": "Calendar",
     "Vorheriger Monat": "Previous month",
     "Nächster Monat": "Next month",
-    "Alle Personen": "All people"
+    "Alle Personen": "All people",
+    ":count offen": ":count open",
+    ":count erledigt": ":count done",
+    "seit :days": ":days overdue",
+    "Heute ist alles erledigt.": "Everything for today is done.",
+    "Für heute steht nichts an.": "Nothing scheduled for today.",
+    "Aufgabe hinzufügen": "Add a task",
+    "{1} :count überfällig|[2,*] :count überfällig": "{1} :count overdue|[2,*] :count overdue",
+    "Löschen": "Delete",
+    "Diese Woche": "This week"
 }

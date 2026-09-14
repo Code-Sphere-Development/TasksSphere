@@ -41,4 +41,18 @@ enum TaskPriority: int
             self::Low => 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600',
         };
     }
+
+    /**
+     * Farbe der Schiene links an der Zeile und des Punktes in der Randspalte.
+     * Literal, damit Tailwind sie findet.
+     */
+    public function accentClass(): string
+    {
+        return match ($this) {
+            self::Urgent => 'bg-red-500',
+            self::High => 'bg-amber-500',
+            self::Medium => 'bg-sky-400',
+            self::Low => 'bg-gray-300 dark:bg-gray-600',
+        };
+    }
 }

@@ -175,13 +175,67 @@ class TaskManager extends Component
         $todayCount = $occurrences->filter(fn ($o) => ! $o['is_completed'] && $o['planned_at'] && $o['planned_at']->isToday())->count();
 
         return view('livewire.task-manager', [
+            'groups' => $this->groupOccurrences($occurrences),
             'tasks' => $allTasks,
             'occurrences' => $occurrences,
             'todayCount' => $todayCount,
+            'todayDoneCount' => $this->completedToday(),
             'completedCompletions' => $completedCompletions,
             'detailTask' => $this->detailTaskId ? $allTasks->firstWhere('id', $this->detailTaskId) : null,
             'assignablePeople' => $this->assignablePeople(),
         ]);
+    }
+
+    /**
+     * Sortiert die Termine in die Bereiche des Dashboards ein.
+     *
+     * Lag bis hierher als @php-Block im Blade und damit ausserhalb jeder
+     * Testabdeckung. Die Regeln sind unveraendert uebernommen: was heute
+     * frueher faellig war, gilt als heute und nicht als ueberfaellig.
+     *
+     * @return array{overdue: Collection, today: Collection, upcoming: array<int, array{key: string, title: string, occurrences: Collection}>, later: Collection, undated: Collection}
+     */
+    /**
+     * Wie viele Termine heute schon erledigt sind. Fuer den Tagesfortschritt.
+     */
+    protected function completedToday(): int
+    {
+        return TaskCompletion::whereHas('task', fn ($query) => $query->where('user_id', Auth::id())
+            ->orWhere('assigned_to', Auth::id()))
+            ->where('is_skipped', false)
+            ->whereDate('completed_at', now()->toDateString())
+            ->count();
+    }
+
+    protected function groupOccurrences(Collection $occurrences): array
+    {
+        $open = $occurrences->filter(fn ($o) => ! $o['is_completed']);
+        $dated = $open->filter(fn ($o) => $o['planned_at'] !== null);
+        $weekEnd = now()->addDays(7)->endOfDay();
+
+        $upcoming = [];
+        for ($offset = 1; $offset <= 7; $offset++) {
+            $date = now()->addDays($offset);
+            $ofDay = $dated->filter(fn ($o) => $o['planned_at']->isSameDay($date));
+
+            if ($ofDay->isEmpty()) {
+                continue;
+            }
+
+            $upcoming[] = [
+                'key' => $date->toDateString(),
+                'title' => $date->isTomorrow() ? __('Morgen') : $date->translatedFormat('l, d.m.'),
+                'occurrences' => $ofDay->values(),
+            ];
+        }
+
+        return [
+            'overdue' => $dated->filter(fn ($o) => $o['planned_at']->isPast() && ! $o['planned_at']->isToday())->values(),
+            'today' => $dated->filter(fn ($o) => $o['planned_at']->isToday())->values(),
+            'upcoming' => $upcoming,
+            'later' => $dated->filter(fn ($o) => $o['planned_at']->isAfter($weekEnd))->values(),
+            'undated' => $open->filter(fn ($o) => $o['planned_at'] === null)->values(),
+        ];
     }
 
     public function showTaskDetail(int $taskId, ?string $plannedAt = null): void

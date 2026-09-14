@@ -244,6 +244,31 @@ class Task extends Model
     }
 
     /**
+     * Kurzform fuer die Zeile: nur Takt und Wochentage, ohne Uhrzeiten und
+     * Zeitzone. Die vollstaendige Fassung steht in der Detailansicht.
+     */
+    public function recurrenceShort(): ?string
+    {
+        if (! $this->isRecurring()) {
+            return null;
+        }
+
+        $rule = $this->recurrence_rule;
+        $frequency = $rule['frequency'] ?? null;
+        $label = $this->frequencyLabel($frequency, (int) ($rule['interval'] ?? 1));
+
+        if ($label === null) {
+            return null;
+        }
+
+        if ($frequency === 'weekly' && ! empty($rule['weekdays'])) {
+            return $label.', '.$this->weekdayList($rule['weekdays']);
+        }
+
+        return $label;
+    }
+
+    /**
      * ISO-Wochentage (1 = Mo) als lokalisierte Kurznamen in Kalenderreihenfolge.
      */
     protected function weekdayList(array $weekdays): string
