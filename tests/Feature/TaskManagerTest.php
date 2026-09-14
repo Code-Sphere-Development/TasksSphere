@@ -3,6 +3,7 @@
 use App\Livewire\TaskManager;
 use App\Models\Task;
 use App\Models\TaskCompletion;
+use App\Models\TaskList;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -57,4 +58,151 @@ test('it only shows completed tasks for the logged in user', function () {
             return $completions->contains('task_id', $task2->id) &&
                    ! $completions->contains('task_id', $task1->id);
         });
+});
+
+test('opening the task detail exposes the task to the view', function () {
+    $user = User::factory()->create();
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'title' => 'Rechnungen sortieren',
+        'description' => 'Alle offenen Rechnungen des Monats ablegen.',
+        'is_archived' => false,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->call('showTaskDetail', $task->id, '2026-09-14 08:00:00')
+        ->assertSet('detailTaskId', $task->id)
+        ->assertSet('detailPlannedAt', '2026-09-14 08:00:00')
+        ->assertViewHas('detailTask', fn ($detailTask) => $detailTask?->is($task));
+});
+
+test('the task detail cannot be opened for someone elses task', function () {
+    $user = User::factory()->create();
+    $foreignTask = Task::factory()->create(['is_archived' => false]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->call('showTaskDetail', $foreignTask->id)
+        ->assertForbidden();
+});
+
+test('closing the task detail clears its state', function () {
+    $user = User::factory()->create();
+    $task = Task::factory()->create(['user_id' => $user->id, 'is_archived' => false]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->call('showTaskDetail', $task->id)
+        ->call('closeTaskDetail')
+        ->assertSet('detailTaskId', null)
+        ->assertViewHas('detailTask', null);
+});
+
+test('editing from the task detail fills the form and closes the detail', function () {
+    $user = User::factory()->create();
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'title' => 'Backup prüfen',
+        'is_archived' => false,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->call('showTaskDetail', $task->id)
+        ->call('editTask', $task->id)
+        ->assertSet('title', 'Backup prüfen')
+        ->assertSet('isEditing', true)
+        ->assertSet('detailTaskId', null);
+});
+
+test('the dashboard renders no detail modal before one is opened', function () {
+    $user = User::factory()->create();
+    Task::factory()->create(['user_id' => $user->id, 'is_archived' => false]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->assertDontSeeHtml('wire:click="closeTaskDetail"');
+});
+
+test('the detail modal shows list, source and recurrence of the task', function () {
+    app()->setLocale('de');
+
+    $user = User::factory()->create();
+    $list = TaskList::factory()->create(['user_id' => $user->id, 'title' => 'Haushalt']);
+    $task = Task::factory()->agent()->create([
+        'user_id' => $user->id,
+        'task_list_id' => $list->id,
+        'title' => 'Müll rausbringen',
+        'is_archived' => false,
+        'recurrence_rule' => ['frequency' => 'weekly', 'interval' => 1, 'weekdays' => [1, 4], 'times' => ['07:30']],
+        'recurrence_timezone' => 'Europe/Berlin',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->call('showTaskDetail', $task->id)
+        ->assertSeeHtml('wire:click="closeTaskDetail"')
+        ->assertSee('Haushalt')
+        ->assertSee('Agent')
+        ->assertSee('Wöchentlich, Mo und Do, um 07:30 Uhr (Europe/Berlin)');
+});
+
+test('each task card offers a control that opens its detail', function () {
+    $user = User::factory()->create();
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'title' => 'Steuer vorbereiten',
+        'due_at' => now()->addDay()->setTime(9, 0),
+        'is_archived' => false,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->assertSeeHtml('wire:click="showTaskDetail('.$task->id);
+});
+
+test('the detail modal labels are translated for the english locale', function () {
+    app()->setLocale('en');
+
+    $user = User::factory()->create();
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'due_at' => now()->addDay()->setTime(9, 0),
+        'is_archived' => false,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->call('showTaskDetail', $task->id)
+        ->assertSee('Due on')
+        ->assertSee('Created on')
+        ->assertDontSee('Fällig am');
+});
+
+test('the detail modal wires the complete action to the shown occurrence', function () {
+    $user = User::factory()->create();
+    $task = Task::factory()->create(['user_id' => $user->id, 'is_archived' => false]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->call('showTaskDetail', $task->id, '2026-09-14 08:00:00')
+        ->assertSeeHtml('wire:click="completeTask('.$task->id.", '2026-09-14 08:00:00')\"");
+});
+
+test('completing a task from the detail closes the detail', function () {
+    $user = User::factory()->create();
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'due_at' => now()->addDay(),
+        'is_archived' => false,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->call('showTaskDetail', $task->id)
+        ->call('completeTask', $task->id)
+        ->assertSet('detailTaskId', null);
+
+    expect($task->fresh()->completed_at)->not->toBeNull();
 });

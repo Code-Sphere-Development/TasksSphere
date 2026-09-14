@@ -75,5 +75,19 @@
     "Receive push notifications on your devices.": "Receive push notifications on your devices.",
     "Agent": "Agent",
     "Import": "Import",
-    "Selbst angelegt": "Created manually"
+    "Selbst angelegt": "Created manually",
+    "Alle :count Stunden": "Every :count hours",
+    "Alle :count Tage": "Every :count days",
+    "Alle :count Wochen": "Every :count weeks",
+    "Alle :count Monate": "Every :count months",
+    "und": "and",
+    "um :times Uhr": "at :times",
+    "Schließen": "Close",
+    "Dieser Termin": "This occurrence",
+    "Fällig am": "Due on",
+    "Erstellt am": "Created on",
+    "Details anzeigen": "Show details",
+    "Liste": "List",
+    "Erledigen": "Complete",
+    "Bearbeiten": "Edit"
 }

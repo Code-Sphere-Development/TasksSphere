@@ -206,7 +206,7 @@
 
                                             <div class="flex-grow min-w-0">
                                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0">
-                                                    <div class="flex flex-col min-w-0">
+                                                    <button type="button" wire:click="showTaskDetail({{ $task->id }}, '{{ $plannedAt }}')" title="{{ __('Details anzeigen') }}" class="flex flex-col min-w-0 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg">
                                                         <div class="flex items-center gap-2 min-w-0">
                                                             <h3 class="text-base font-bold text-gray-900 dark:text-white truncate">
                                                                 {{ $task->title }}
@@ -220,7 +220,7 @@
                                                         @if($task->description)
                                                             <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $task->description }}</p>
                                                         @endif
-                                                    </div>
+                                                    </button>
 
                                                     <div class="flex items-center space-x-3 flex-shrink-0">
                                                         @if($plannedAt)
@@ -308,6 +308,11 @@
             @endif
         </div>
     </div>
+
+    <!-- Task Detail Modal -->
+    @if($detailTask)
+        @include('livewire.partials.task-detail-modal')
+    @endif
 
     <!-- Deletion Confirmation Modal -->
     @if($confirmingTaskDeletion)

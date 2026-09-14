@@ -73,5 +73,19 @@
     "Email Notifications": "E-Mail-Benachrichtigungen",
     "Receive notifications via email.": "Benachrichtigungen per E-Mail erhalten.",
     "Push Notifications": "Push-Benachrichtigungen",
-    "Receive push notifications on your devices.": "Push-Benachrichtigungen auf Ihren Geräten erhalten."
+    "Receive push notifications on your devices.": "Push-Benachrichtigungen auf Ihren Geräten erhalten.",
+    "Alle :count Stunden": "Alle :count Stunden",
+    "Alle :count Tage": "Alle :count Tage",
+    "Alle :count Wochen": "Alle :count Wochen",
+    "Alle :count Monate": "Alle :count Monate",
+    "und": "und",
+    "um :times Uhr": "um :times Uhr",
+    "Schließen": "Schließen",
+    "Dieser Termin": "Dieser Termin",
+    "Fällig am": "Fällig am",
+    "Erstellt am": "Erstellt am",
+    "Details anzeigen": "Details anzeigen",
+    "Liste": "Liste",
+    "Erledigen": "Erledigen",
+    "Bearbeiten": "Bearbeiten"
 }

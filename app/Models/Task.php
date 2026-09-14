@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 class Task extends Model
@@ -123,6 +124,92 @@ class Task extends Model
     public function isRecurring(): bool
     {
         return ! empty($this->recurrence_rule);
+    }
+
+    /**
+     * Ausgeschriebene Wiederholungsregel fuer die Anzeige, null wenn einmalig.
+     */
+    public function recurrenceSummary(): ?string
+    {
+        if (! $this->isRecurring()) {
+            return null;
+        }
+
+        $rule = $this->recurrence_rule;
+        $frequency = $rule['frequency'] ?? null;
+
+        $label = $this->frequencyLabel($frequency, (int) ($rule['interval'] ?? 1));
+
+        if ($label === null) {
+            return null;
+        }
+
+        $parts = [$label];
+
+        if ($frequency === 'weekly' && ! empty($rule['weekdays'])) {
+            $parts[] = $this->weekdayList($rule['weekdays']);
+        }
+
+        if (! empty($rule['times'])) {
+            $parts[] = __('um :times Uhr', ['times' => $this->joinList($rule['times'])]);
+        }
+
+        $summary = implode(', ', $parts);
+
+        if ($this->recurrence_timezone) {
+            $summary .= ' ('.$this->recurrence_timezone.')';
+        }
+
+        return $summary;
+    }
+
+    /**
+     * ISO-Wochentage (1 = Mo) als lokalisierte Kurznamen in Kalenderreihenfolge.
+     */
+    protected function weekdayList(array $weekdays): string
+    {
+        $weekdays = array_filter(
+            array_unique(array_map('intval', $weekdays)),
+            fn (int $iso) => $iso >= 1 && $iso <= 7
+        );
+        sort($weekdays);
+
+        $monday = Carbon::create(2024, 1, 1); // Ein Montag, dient nur als Bezugspunkt.
+
+        return $this->joinList(array_map(
+            fn (int $iso) => $monday->copy()->addDays($iso - 1)->locale(app()->getLocale())->isoFormat('dd'),
+            $weekdays
+        ));
+    }
+
+    protected function joinList(array $items): string
+    {
+        return Arr::join($items, ', ', ' '.__('und').' ');
+    }
+
+    /**
+     * "Taeglich" bei Intervall 1, sonst "Alle N Tage".
+     */
+    protected function frequencyLabel(?string $frequency, int $interval): ?string
+    {
+        $labels = [
+            'hourly' => [__('Stündlich'), 'Stunden'],
+            'daily' => [__('Täglich'), 'Tage'],
+            'weekly' => [__('Wöchentlich'), 'Wochen'],
+            'monthly' => [__('Monatlich'), 'Monate'],
+        ];
+
+        if (! isset($labels[$frequency])) {
+            return null;
+        }
+
+        [$singular, $plural] = $labels[$frequency];
+
+        if ($interval <= 1) {
+            return $singular;
+        }
+
+        return __('Alle :count '.$plural, ['count' => $interval]);
     }
 
     public function isHandledAt($date): bool

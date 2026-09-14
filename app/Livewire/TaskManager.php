@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Enums\TaskSource;
+use App\Models\Task;
 use App\Models\TaskCompletion;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -41,6 +42,10 @@ class TaskManager extends Component
     public $deletionPlannedAt = null;
 
     public $recurrence_timezone;
+
+    public ?int $detailTaskId = null;
+
+    public ?string $detailPlannedAt = null;
 
     protected $rules = [
         'title' => 'required|string|max:255',
@@ -92,7 +97,7 @@ class TaskManager extends Component
     public function render(): Factory|View|\Illuminate\View\View
     {
         $allTasks = Auth::user()->tasks()
-            ->with('completions')
+            ->with('completions', 'taskList')
             ->where('is_archived', false)
             ->where(function ($query) {
                 $query->whereNull('completed_at')
@@ -128,7 +133,22 @@ class TaskManager extends Component
             'occurrences' => $occurrences,
             'todayCount' => $todayCount,
             'completedCompletions' => $completedCompletions,
+            'detailTask' => $this->detailTaskId ? $allTasks->firstWhere('id', $this->detailTaskId) : null,
         ]);
+    }
+
+    public function showTaskDetail(int $taskId, ?string $plannedAt = null): void
+    {
+        $task = Task::findOrFail($taskId);
+        $this->authorize('view', $task);
+
+        $this->detailTaskId = $task->id;
+        $this->detailPlannedAt = $plannedAt;
+    }
+
+    public function closeTaskDetail(): void
+    {
+        $this->reset(['detailTaskId', 'detailPlannedAt']);
     }
 
     public function showCreateForm(): void
@@ -187,6 +207,7 @@ class TaskManager extends Component
         $this->recurrence_timezone = $task->recurrence_timezone ?? 'Europe/Berlin';
 
         $this->isEditing = true;
+        $this->closeTaskDetail();
     }
 
     public function updateTask(): void
@@ -227,6 +248,7 @@ class TaskManager extends Component
     {
         $task = Auth::user()->tasks()->findOrFail($taskId);
         $task->complete($plannedAt);
+        $this->closeTaskDetail();
     }
 
     public function deleteTask($taskId, $plannedAt = null): void
