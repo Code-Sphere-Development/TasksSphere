@@ -42,6 +42,13 @@
                         </div>
                     @endif
 
+                    @if($detailTask->assignedTo)
+                        <div class="flex justify-between gap-4">
+                            <dt class="font-semibold text-gray-500 dark:text-gray-400 flex-shrink-0">{{ __('Zuständig') }}</dt>
+                            <dd class="text-right text-gray-900 dark:text-white">{{ $detailTask->assignedTo->name }}</dd>
+                        </div>
+                    @endif
+
                     @if($detailTask->priority)
                         <div class="flex justify-between gap-4">
                             <dt class="font-semibold text-gray-500 dark:text-gray-400 flex-shrink-0">{{ __('Priorität') }}</dt>

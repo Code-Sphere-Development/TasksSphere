@@ -57,3 +57,50 @@ test('forceDelete denies everyone including the owner', function () {
     expect($this->policy->forceDelete($this->owner, $this->task))->toBeFalse();
     expect($this->policy->forceDelete($this->other, $this->task))->toBeFalse();
 });
+
+// --- Zuweisung ---------------------------------------------------------------
+// Wer zustaendig ist, muss die Aufgabe sehen und bearbeiten koennen. Loeschen
+// bleibt beim Besitzer: Zustaendige erledigen, sie vernichten nicht.
+
+test('view allows the assigned person', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    $task = Task::factory()->for($owner)->create();
+    $task->assignTo($member, $owner);
+
+    expect((new TaskPolicy)->view($member, $task->fresh()))->toBeTrue();
+});
+
+test('update allows the assigned person', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    $task = Task::factory()->for($owner)->create();
+    $task->assignTo($member, $owner);
+
+    expect((new TaskPolicy)->update($member, $task->fresh()))->toBeTrue();
+});
+
+test('delete denies the assigned person', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    $task = Task::factory()->for($owner)->create();
+    $task->assignTo($member, $owner);
+
+    expect((new TaskPolicy)->delete($member, $task->fresh()))->toBeFalse();
+});
+
+test('view denies someone who is merely in the pool but not responsible', function () {
+    $owner = User::factory()->create();
+    $inPool = User::factory()->create();
+    $task = Task::factory()->for($owner)->create();
+    $task->assignees()->attach($inPool->id, ['assigned_by' => $owner->id]);
+
+    expect((new TaskPolicy)->view($inPool, $task->fresh()))->toBeFalse();
+});
+
+test('view still denies an unrelated user', function () {
+    $stranger = User::factory()->create();
+    $task = Task::factory()->create();
+
+    expect((new TaskPolicy)->view($stranger, $task))->toBeFalse();
+});

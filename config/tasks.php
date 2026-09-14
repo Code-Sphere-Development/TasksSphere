@@ -1,5 +1,7 @@
 <?php
 
+use App\Support\People\LocalPeopleDirectory;
+
 return [
 
     /*
@@ -36,6 +38,19 @@ return [
     | Erlaubte Werte: siehe App\Enums\TaskSource.
     |
     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Personenverzeichnis
+    |--------------------------------------------------------------------------
+    |
+    | Wer beantwortet die Frage, welchen Menschen Aufgaben zugewiesen werden
+    | koennen. Standard ist die eigene Datenbank; sobald FamilyNetwork
+    | angebunden ist, tritt hier eine andere Implementierung an die Stelle.
+    |
+    */
+
+    'people_directory' => env('TASKS_PEOPLE_DIRECTORY', LocalPeopleDirectory::class),
 
     'sources_by_token_name' => [
         'gehirn-agent' => 'agent',

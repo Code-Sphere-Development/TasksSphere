@@ -7,18 +7,31 @@ use App\Enums\TaskSource;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\TaskCompletion;
+use App\Models\User;
 use App\Notifications\TaskReminderNotification;
+use App\Support\People\PeopleDirectory;
 use App\Support\TaskSourceResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class TaskApiController extends Controller
 {
-    public function index()
+    /**
+     * Standardmaessig weiterhin ausschliesslich die eigenen Aufgaben. Der
+     * Gehirn-Agent haengt an diesem Endpunkt; seine Antwort darf sich durch
+     * die Zuweisung nicht stillschweigend aendern. Wer zugewiesene Aufgaben
+     * mitsehen will, fragt ausdruecklich mit include=assigned danach.
+     */
+    public function index(Request $request)
     {
-        return Auth::user()->tasks()
+        $query = $request->query('include') === 'assigned'
+            ? Task::forPerson(Auth::id())
+            : Auth::user()->tasks();
+
+        return $query
             ->where('is_archived', false)
             ->whereNull('completed_at')
             ->orderBy('due_at', 'asc')
@@ -66,6 +79,7 @@ class TaskApiController extends Controller
             'source' => ['nullable', Rule::enum(TaskSource::class)],
             'description' => 'nullable|string',
             'priority' => ['nullable', 'integer', Rule::enum(TaskPriority::class)],
+            'assigned_to' => ['nullable', 'integer', Rule::in($this->assignableIds($request))],
             'due_at' => 'nullable|date',
             'recurrence_rule' => 'nullable|array',
             'recurrence_rule.frequency' => 'nullable|in:hourly,daily,weekly,monthly',
@@ -90,7 +104,14 @@ class TaskApiController extends Controller
             $request->user()->currentAccessToken(),
         );
 
+        $assignedTo = $validated['assigned_to'] ?? null;
+        unset($validated['assigned_to']);
+
         $task = Auth::user()->tasks()->create($validated);
+
+        if ($assignedTo) {
+            $task->assignTo(User::findOrFail($assignedTo), $request->user());
+        }
 
         if ($request->boolean('notify')) {
             Auth::user()->notify(new TaskReminderNotification($task));
@@ -114,6 +135,7 @@ class TaskApiController extends Controller
             'title' => 'string|max:255',
             'description' => 'nullable|string',
             'priority' => ['nullable', 'integer', Rule::enum(TaskPriority::class)],
+            'assigned_to' => ['nullable', 'integer', Rule::in($this->assignableIds($request))],
             'due_at' => 'nullable|date',
             'recurrence_rule' => 'nullable|array',
             'recurrence_rule.frequency' => 'nullable|in:hourly,daily,weekly,monthly',
@@ -168,5 +190,17 @@ class TaskApiController extends Controller
         $task->delete();
 
         return response()->json(['message' => 'Task deleted']);
+    }
+
+    /**
+     * Die zulaessigen Zustaendigen kommen aus dem Personenverzeichnis, nicht
+     * aus einer offenen exists-Regel - sonst liesse sich eine Aufgabe an eine
+     * beliebige fremde Person haengen.
+     *
+     * @return Collection<int, int>
+     */
+    private function assignableIds(Request $request): Collection
+    {
+        return app(PeopleDirectory::class)->assignableFor($request->user())->pluck('id');
     }
 }

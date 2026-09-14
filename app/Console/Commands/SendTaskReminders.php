@@ -56,14 +56,15 @@ class SendTaskReminders extends Command
                 $query->whereNull('last_notified_at')
                     ->orWhereColumn('last_notified_at', '<', 'due_at');
             })
-            ->with('user');
+            ->with('user', 'assignedTo');
 
         $this->info('Gefundene fällige Aufgaben: '.$query->count().' | '.now());
         Log::info('Scheduler: Found '.$query->count().' due tasks to process.');
 
         $query->chunk(100, function ($tasks) {
             foreach ($tasks as $task) {
-                $user = $task->user;
+                // Benachrichtigt wird, wer zustaendig ist - ersatzweise der Besitzer.
+                $user = $task->assignedTo ?: $task->user;
 
                 if ($user) {
                     if (! $user->notify_push) {

@@ -19,6 +19,7 @@ class Task extends Model
 
     protected $fillable = [
         'user_id',
+        'assigned_to',
         'task_list_id',
         'title',
         'description',
@@ -52,6 +53,54 @@ class Task extends Model
     public function completions()
     {
         return $this->hasMany(TaskCompletion::class);
+    }
+
+    /** Der Kreis moeglicher Zustaendiger. */
+    public function assignees()
+    {
+        return $this->belongsToMany(User::class, 'task_assignments')
+            ->withPivot('assigned_by')
+            ->withTimestamps();
+    }
+
+    /** Die aktuell zustaendige Person. */
+    public function assignedTo()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    /**
+     * Nimmt die Person in den Kreis auf und macht sie zustaendig.
+     */
+    public function assignTo(User $user, ?User $by = null): void
+    {
+        $this->assignees()->syncWithoutDetaching([$user->id => ['assigned_by' => $by?->id]]);
+        $this->assigned_to = $user->id;
+        $this->save();
+    }
+
+    public function removeAssignee(User $user): void
+    {
+        $this->assignees()->detach($user->id);
+
+        if ($this->assigned_to === $user->id) {
+            $this->assigned_to = null;
+            $this->save();
+        }
+    }
+
+    /**
+     * Aufgaben, die der Person gehoeren oder ihr zugewiesen sind.
+     *
+     * Bewusst getrennt von der Relation user()->tasks(): Das Dashboard nutzt
+     * diesen Blick, GET /api/tasks behaelt seine bisherige Bedeutung, weil der
+     * Gehirn-Agent daran haengt.
+     */
+    public function scopeForPerson($query, int $userId)
+    {
+        return $query->where(function ($q) use ($userId) {
+            $q->where('user_id', $userId)->orWhere('assigned_to', $userId);
+        });
     }
 
     public function taskList()

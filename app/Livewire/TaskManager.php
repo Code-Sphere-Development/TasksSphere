@@ -5,10 +5,14 @@ namespace App\Livewire;
 use App\Enums\TaskSource;
 use App\Models\Task;
 use App\Models\TaskCompletion;
+use App\Models\User;
+use App\Support\People\PeopleDirectory;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class TaskManager extends Component
@@ -18,6 +22,8 @@ class TaskManager extends Component
     public $description;
 
     public $priority = '';
+
+    public $assigned_to = '';
 
     public $due_at;
 
@@ -49,16 +55,29 @@ class TaskManager extends Component
 
     public ?string $detailPlannedAt = null;
 
-    protected $rules = [
-        'title' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'priority' => 'nullable|integer|in:1,2,3,4',
-        'due_at' => 'nullable|date',
-        'frequency' => 'required|in:none,hourly,daily,weekly,monthly',
-        'interval' => 'required|integer|min:1',
-        'weekdays' => 'nullable|array',
-        'recurrence_timezone' => 'required|string|timezone',
-    ];
+    /**
+     * Als Methode, nicht als Eigenschaft: Die zulaessigen Zustaendigen haengen
+     * am angemeldeten Nutzer und stehen erst zur Laufzeit fest.
+     */
+    protected function rules(): array
+    {
+        return [
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'priority' => 'nullable|integer|in:1,2,3,4',
+            'assigned_to' => ['nullable', 'integer', Rule::in($this->assignablePeople()->pluck('id'))],
+            'due_at' => 'nullable|date',
+            'frequency' => 'required|in:none,hourly,daily,weekly,monthly',
+            'interval' => 'required|integer|min:1',
+            'weekdays' => 'nullable|array',
+            'recurrence_timezone' => 'required|string|timezone',
+        ];
+    }
+
+    private function assignablePeople(): Collection
+    {
+        return app(PeopleDirectory::class)->assignableFor(Auth::user());
+    }
 
     public function mount(): void
     {
@@ -99,8 +118,10 @@ class TaskManager extends Component
 
     public function render(): Factory|View|\Illuminate\View\View
     {
-        $allTasks = Auth::user()->tasks()
-            ->with('completions', 'taskList')
+        // Eigene Aufgaben und solche, fuer die ich zustaendig bin. Bewusst
+        // nicht ueber Auth::user()->tasks(), das bildet nur den Besitz ab.
+        $allTasks = Task::forPerson(Auth::id())
+            ->with('completions', 'taskList', 'assignedTo')
             ->where('is_archived', false)
             ->where(function ($query) {
                 $query->whereNull('completed_at')
@@ -137,6 +158,7 @@ class TaskManager extends Component
             'todayCount' => $todayCount,
             'completedCompletions' => $completedCompletions,
             'detailTask' => $this->detailTaskId ? $allTasks->firstWhere('id', $this->detailTaskId) : null,
+            'assignablePeople' => $this->assignablePeople(),
         ]);
     }
 
@@ -176,7 +198,7 @@ class TaskManager extends Component
 
         $dueAt = $this->prepareDueAt();
 
-        Auth::user()->tasks()->create([
+        $task = Auth::user()->tasks()->create([
             'title' => $this->title,
             'description' => $this->description,
             'priority' => $this->priority !== '' ? (int) $this->priority : null,
@@ -186,7 +208,11 @@ class TaskManager extends Component
             'source' => TaskSource::Manual,
         ]);
 
-        $this->reset(['title', 'description', 'priority', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'showForm']);
+        if ($this->assigned_to !== '') {
+            $task->assignTo(User::findOrFail((int) $this->assigned_to), Auth::user());
+        }
+
+        $this->reset(['title', 'description', 'priority', 'assigned_to', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'showForm']);
     }
 
     public function editTask($taskId): void
@@ -196,6 +222,7 @@ class TaskManager extends Component
         $this->title = $task->title;
         $this->description = $task->description;
         $this->priority = $task->priority?->value ?? '';
+        $this->assigned_to = $task->assigned_to ?? '';
         $this->due_at = $task->due_at ? $task->due_at->format('Y-m-d\TH:i') : null;
 
         if ($task->isRecurring()) {
@@ -242,12 +269,18 @@ class TaskManager extends Component
             'recurrence_timezone' => $this->recurrence_timezone,
         ]);
 
+        if ($this->assigned_to !== '') {
+            $task->assignTo(User::findOrFail((int) $this->assigned_to), Auth::user());
+        } else {
+            $task->update(['assigned_to' => null]);
+        }
+
         $this->cancelEdit();
     }
 
     public function cancelEdit(): void
     {
-        $this->reset(['title', 'description', 'priority', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'isEditing', 'editingTask', 'showForm']);
+        $this->reset(['title', 'description', 'priority', 'assigned_to', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'isEditing', 'editingTask', 'showForm']);
     }
 
     public function completeTask($taskId, $plannedAt = null): void

@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\HouseholdManager;
 use App\Livewire\ListDetail;
 use App\Livewire\ListManager;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,8 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    Route::get('/household', HouseholdManager::class)->name('household.index');
 
     Route::get('/lists', ListManager::class)->name('lists.index');
     Route::get('/lists/{taskList}', ListDetail::class)->name('lists.show');

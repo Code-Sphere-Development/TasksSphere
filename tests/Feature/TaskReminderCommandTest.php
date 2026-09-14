@@ -147,3 +147,43 @@ test('reminder command aborts loudly when the configured firebase project does n
     // Die Aufgabe darf nicht als benachrichtigt gelten, sonst geht der Termin verloren.
     expect($task->fresh()->last_notified_at)->toBeNull();
 });
+
+test('the reminder goes to the assigned person, not the owner', function () {
+    Notification::fake();
+
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    UserDevice::create(['user_id' => $member->id, 'device_id' => 'd1', 'fcm_token' => 'token-member']);
+    UserDevice::create(['user_id' => $owner->id, 'device_id' => 'd2', 'fcm_token' => 'token-owner']);
+
+    $task = Task::factory()->create([
+        'user_id' => $owner->id,
+        'due_at' => now()->subMinute(),
+        'completed_at' => null,
+        'last_notified_at' => null,
+    ]);
+    $task->assignTo($member, $owner);
+
+    $this->artisan('tasks:send-reminders')->assertSuccessful();
+
+    Notification::assertSentTo($member, TaskReminderNotification::class);
+    Notification::assertNotSentTo($owner, TaskReminderNotification::class);
+});
+
+test('without an assignment the reminder still goes to the owner', function () {
+    Notification::fake();
+
+    $owner = User::factory()->create();
+    UserDevice::create(['user_id' => $owner->id, 'device_id' => 'd1', 'fcm_token' => 'token-owner']);
+
+    Task::factory()->create([
+        'user_id' => $owner->id,
+        'due_at' => now()->subMinute(),
+        'completed_at' => null,
+        'last_notified_at' => null,
+    ]);
+
+    $this->artisan('tasks:send-reminders')->assertSuccessful();
+
+    Notification::assertSentTo($owner, TaskReminderNotification::class);
+});

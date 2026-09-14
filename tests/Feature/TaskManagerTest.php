@@ -2,6 +2,7 @@
 
 use App\Enums\TaskPriority;
 use App\Livewire\TaskManager;
+use App\Models\Household;
 use App\Models\Task;
 use App\Models\TaskCompletion;
 use App\Models\TaskList;
@@ -295,4 +296,88 @@ test('completing from the dashboard records the acting user as completer', funct
         ->call('completeTask', $task->id);
 
     expect($task->completions()->first()->completed_by)->toBe($owner->id);
+});
+
+test('a task assigned to me appears on my dashboard', function () {
+    $owner = User::factory()->create();
+    $me = User::factory()->create();
+    $task = Task::factory()->create([
+        'user_id' => $owner->id,
+        'title' => 'Zugewiesene Aufgabe',
+        'due_at' => now()->addHour(),
+        'is_archived' => false,
+    ]);
+    $task->assignTo($me, $owner);
+
+    Livewire::actingAs($me)
+        ->test(TaskManager::class)
+        ->assertSee('Zugewiesene Aufgabe');
+});
+
+test('a task of someone else does not appear on my dashboard', function () {
+    $me = User::factory()->create();
+    Task::factory()->create([
+        'title' => 'Fremde Aufgabe',
+        'due_at' => now()->addHour(),
+        'is_archived' => false,
+    ]);
+
+    Livewire::actingAs($me)
+        ->test(TaskManager::class)
+        ->assertDontSee('Fremde Aufgabe');
+});
+
+test('a task can be created with a responsible person', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    Household::createFor($owner, 'Familie')->addMember($member);
+
+    Livewire::actingAs($owner)
+        ->test(TaskManager::class)
+        ->set('title', 'Muell')
+        ->set('assigned_to', $member->id)
+        ->call('createTask');
+
+    $task = $owner->tasks()->first();
+    expect($task->assigned_to)->toBe($member->id);
+    expect($task->assignees->pluck('id'))->toContain($member->id);
+});
+
+test('a person outside my households cannot be made responsible', function () {
+    $owner = User::factory()->create();
+    $stranger = User::factory()->create();
+
+    Livewire::actingAs($owner)
+        ->test(TaskManager::class)
+        ->set('title', 'Muell')
+        ->set('assigned_to', $stranger->id)
+        ->call('createTask')
+        ->assertHasErrors('assigned_to');
+
+    expect($owner->tasks()->count())->toBe(0);
+});
+
+test('editing a task prefills the responsible person', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    Household::createFor($owner, 'Familie')->addMember($member);
+    $task = Task::factory()->for($owner)->create(['is_archived' => false]);
+    $task->assignTo($member, $owner);
+
+    Livewire::actingAs($owner)
+        ->test(TaskManager::class)
+        ->call('editTask', $task->id)
+        ->assertSet('assigned_to', $member->id);
+});
+
+test('the assignable people are offered to the view', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    $stranger = User::factory()->create();
+    Household::createFor($owner, 'Familie')->addMember($member);
+
+    Livewire::actingAs($owner)
+        ->test(TaskManager::class)
+        ->assertViewHas('assignablePeople', fn ($people) => $people->contains('id', $member->id)
+            && ! $people->contains('id', $stranger->id));
 });

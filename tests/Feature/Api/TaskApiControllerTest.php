@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\TaskPriority;
+use App\Models\Household;
 use App\Models\Task;
 use App\Models\TaskCompletion;
 use App\Models\TaskList;
@@ -540,4 +541,47 @@ test('update can clear the priority', function () {
     $this->putJson("/api/tasks/{$task->id}", ['priority' => null])->assertOk();
 
     expect($task->fresh()->priority)->toBeNull();
+});
+
+test('store accepts a responsible person from my household', function () {
+    $owner = User::factory()->create();
+    $member = User::factory()->create();
+    Household::createFor($owner, 'Familie')->addMember($member);
+    Sanctum::actingAs($owner);
+
+    $this->postJson('/api/tasks', ['title' => 'Muell', 'assigned_to' => $member->id])->assertCreated();
+
+    expect($owner->tasks()->first()->assigned_to)->toBe($member->id);
+});
+
+test('store rejects a responsible person outside my households', function () {
+    $owner = User::factory()->create();
+    $stranger = User::factory()->create();
+    Sanctum::actingAs($owner);
+
+    $this->postJson('/api/tasks', ['title' => 'Muell', 'assigned_to' => $stranger->id])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('assigned_to');
+});
+
+test('index keeps its meaning and does not return tasks assigned to me', function () {
+    $owner = User::factory()->create();
+    $me = User::factory()->create();
+    $task = Task::factory()->for($owner)->create(['is_archived' => false, 'completed_at' => null]);
+    $task->assignTo($me, $owner);
+
+    Sanctum::actingAs($me);
+
+    $this->getJson('/api/tasks')->assertOk()->assertJsonCount(0);
+});
+
+test('index returns tasks assigned to me when explicitly asked', function () {
+    $owner = User::factory()->create();
+    $me = User::factory()->create();
+    $task = Task::factory()->for($owner)->create(['is_archived' => false, 'completed_at' => null]);
+    $task->assignTo($me, $owner);
+
+    Sanctum::actingAs($me);
+
+    $this->getJson('/api/tasks?include=assigned')->assertOk()->assertJsonCount(1);
 });

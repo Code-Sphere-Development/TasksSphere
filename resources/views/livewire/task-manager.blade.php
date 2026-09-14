@@ -61,6 +61,18 @@
                             <p class="mt-1 text-xs text-gray-500">{{ __('Standardmäßig heute.') }}</p>
                         </div>
 
+                        @if($assignablePeople->count() > 1)
+                            <div>
+                                <label for="assigned_to" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Zuständig') }}</label>
+                                <select id="assigned_to" wire:model="assigned_to" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
+                                    <option value="">{{ __('Niemand') }}</option>
+                                    @foreach($assignablePeople as $person)
+                                        <option value="{{ $person->id }}">{{ $person->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+
                         <div>
                             <label for="priority" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Priorität') }}</label>
                             <select id="priority" wire:model="priority" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
@@ -221,6 +233,11 @@
                                                             <h3 class="text-base font-bold text-gray-900 dark:text-white truncate">
                                                                 {{ $task->title }}
                                                             </h3>
+                                                            @if($task->assignedTo)
+                                                                <span class="flex-shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-teal-100 text-teal-700 border border-teal-200 dark:bg-teal-900/30 dark:text-teal-400 dark:border-teal-800">
+                                                                    {{ $task->assignedTo->name }}
+                                                                </span>
+                                                            @endif
                                                             @if($task->priority)
                                                                 <span class="flex-shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md border {{ $task->priority->badgeClasses() }}">
                                                                     {{ $task->priority->label() }}

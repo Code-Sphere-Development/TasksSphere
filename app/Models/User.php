@@ -87,6 +87,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function households()
+    {
+        return $this->belongsToMany(Household::class)->withPivot('role')->withTimestamps();
+    }
+
     public function tasks()
     {
         return $this->hasMany(Task::class);

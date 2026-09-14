@@ -20,7 +20,7 @@ class TaskPolicy
      */
     public function view(User $user, Task $task): bool
     {
-        return $user->id === $task->user_id;
+        return $this->ownsOrIsResponsible($user, $task);
     }
 
     /**
@@ -36,7 +36,7 @@ class TaskPolicy
      */
     public function update(User $user, Task $task): bool
     {
-        return $user->id === $task->user_id;
+        return $this->ownsOrIsResponsible($user, $task);
     }
 
     /**
@@ -61,5 +61,15 @@ class TaskPolicy
     public function forceDelete(User $user, Task $task): bool
     {
         return false;
+    }
+
+    /**
+     * Zustaendige duerfen sehen und bearbeiten, aber nicht loeschen - deshalb
+     * greift das hier nur fuer view und update. Blosse Zugehoerigkeit zum
+     * Kreis moeglicher Zustaendiger reicht nicht; es zaehlt, wer gerade dran ist.
+     */
+    private function ownsOrIsResponsible(User $user, Task $task): bool
+    {
+        return $user->id === $task->user_id || $user->id === $task->assigned_to;
     }
 }
