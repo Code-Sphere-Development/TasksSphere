@@ -1,5 +1,5 @@
 <div class="p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
-    <div class="max-w-5xl mx-auto">
+    <div class="mx-auto">
         <!-- Header Section -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
             <div class="flex gap-2 md:ml-auto">
@@ -178,7 +178,7 @@
         </div>
         @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_19rem] gap-6 lg:gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_21rem] gap-6 lg:gap-8">
 
             <div class="space-y-8">
                 @if($groups['overdue']->count() > 0)

@@ -1,5 +1,5 @@
 <div class="p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-[1600px] mx-auto">
         <!-- Header Section -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
             <div>
@@ -127,7 +127,7 @@
             </h2>
 
             @if($myLists->count() > 0)
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     @foreach($myLists as $list)
                         <div class="group bg-white dark:bg-gray-800 shadow-sm hover:shadow-md rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700 transition-all" style="border-left: 4px solid {{ $list->color ?? '#3B82F6' }}">
                             <a href="{{ route('lists.show', $list) }}" wire:navigate class="block p-5">
