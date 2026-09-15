@@ -539,3 +539,85 @@ test('a completion knows who completed it', function () {
 
     expect($task->completions()->first()->completedBy->id)->toBe($task->user_id);
 });
+
+// ---------------------------------------------------------------------------
+// uncomplete()
+// ---------------------------------------------------------------------------
+
+test('uncomplete removes the completion of a one off task', function () {
+    $task = Task::factory()->create(['recurrence_rule' => null, 'recurrence_timezone' => null]);
+    $task->complete();
+
+    $task->uncomplete();
+
+    expect($task->completions()->count())->toBe(0);
+    expect($task->fresh()->completed_at)->toBeNull();
+});
+
+test('uncomplete restores due_at of a recurring task', function () {
+    $task = Task::factory()->recurring('daily', 1)->create([
+        'due_at' => '2026-01-23 08:00:00',
+        'recurrence_timezone' => null,
+    ]);
+    $task->complete();
+    expect($task->fresh()->due_at->format('Y-m-d H:i:s'))->toBe('2026-01-24 08:00:00');
+
+    $task->uncomplete('2026-01-23 08:00:00');
+
+    expect($task->fresh()->due_at->format('Y-m-d H:i:s'))->toBe('2026-01-23 08:00:00');
+    expect($task->completions()->count())->toBe(0);
+});
+
+test('uncomplete never pushes due_at forward', function () {
+    $task = Task::factory()->recurring('daily', 1)->create([
+        'due_at' => '2026-01-23 08:00:00',
+        'recurrence_timezone' => null,
+    ]);
+    // Ein spaeterer Termin wurde ausser der Reihe erledigt.
+    $task->complete('2026-01-25 08:00:00');
+    $task->update(['due_at' => '2026-01-23 08:00:00']);
+
+    $task->uncomplete('2026-01-25 08:00:00');
+
+    expect($task->fresh()->due_at->format('Y-m-d H:i:s'))->toBe('2026-01-23 08:00:00');
+});
+
+test('uncomplete leaves a skipped occurrence untouched', function () {
+    $task = Task::factory()->recurring('daily', 1)->create([
+        'due_at' => '2026-01-23 08:00:00',
+        'recurrence_timezone' => null,
+    ]);
+    $task->skip('2026-01-23 08:00:00');
+
+    $task->uncomplete('2026-01-23 08:00:00');
+
+    expect($task->completions()->where('is_skipped', true)->count())->toBe(1);
+});
+
+test('uncomplete without a matching completion changes nothing', function () {
+    $task = Task::factory()->create([
+        'recurrence_rule' => null,
+        'recurrence_timezone' => null,
+        'completed_at' => null,
+    ]);
+
+    $task->uncomplete();
+
+    expect($task->fresh()->completed_at)->toBeNull();
+    expect($task->completions()->count())->toBe(0);
+});
+
+test('uncomplete refreshes the loaded completions so the occurrence is open again', function () {
+    $task = Task::factory()->recurring('daily', 1)->create([
+        'due_at' => '2026-01-23 08:00:00',
+        'recurrence_timezone' => null,
+    ]);
+    $task->complete('2026-01-23 08:00:00');
+    $task->load('completions');
+    expect($task->isHandledAt('2026-01-23 08:00:00'))->toBeTrue();
+
+    $task->uncomplete('2026-01-23 08:00:00');
+
+    // Ohne das Verwerfen der geladenen Beziehung luege die Anzeige im selben Aufruf weiter.
+    expect($task->isHandledAt('2026-01-23 08:00:00'))->toBeFalse();
+});

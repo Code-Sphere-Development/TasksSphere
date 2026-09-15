@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/tasks/{task}', [TaskApiController::class, 'update']);
     Route::delete('/tasks/{task}', [TaskApiController::class, 'destroy']);
     Route::post('/tasks/{task}/complete', [TaskApiController::class, 'complete']);
+    Route::post('/tasks/{task}/uncomplete', [TaskApiController::class, 'uncomplete']);
     Route::post('/tasks/{task}/skip', [TaskApiController::class, 'skip']);
 
     // Task Lists

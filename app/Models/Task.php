@@ -394,6 +394,39 @@ class Task extends Model
         $this->save();
     }
 
+    /**
+     * Gegenstueck zu complete().
+     *
+     * due_at wird ausschliesslich zurueckgedreht, nie vorgespult: sonst
+     * wuerde das Zuruecknehmen eines ausser der Reihe erledigten Termins die
+     * ganze Serie in die Zukunft schieben.
+     */
+    public function uncomplete($plannedAt = null): void
+    {
+        $timezone = $this->recurrence_timezone ?: config('app.timezone', 'UTC');
+        $plannedAt = $plannedAt ? Carbon::parse($plannedAt, $timezone)->setTimezone('UTC') : ($this->due_at ?: now());
+
+        // Uebersprungene Termine bleiben unberuehrt - sie sind nicht erledigt.
+        $this->completions()
+            ->where('planned_at', $plannedAt)
+            ->where('is_skipped', false)
+            ->delete();
+
+        if ($this->isRecurring()) {
+            if (! $this->due_at || $this->due_at->greaterThan($plannedAt)) {
+                $this->due_at = $plannedAt;
+            }
+        } else {
+            $this->completed_at = null;
+        }
+
+        $this->save();
+
+        // isHandledAt() liest die geladene Sammlung. Ohne das Verwerfen luege
+        // die Anzeige im selben Aufruf weiter.
+        $this->unsetRelation('completions');
+    }
+
     public function skip($plannedAt)
     {
         $timezone = $this->recurrence_timezone ?: config('app.timezone', 'UTC');

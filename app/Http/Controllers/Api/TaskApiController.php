@@ -175,6 +175,21 @@ class TaskApiController extends Controller
         return response()->json(['message' => 'Task completed', 'task' => $task->fresh()]);
     }
 
+    /**
+     * Gegenstueck zu complete(). Gebraucht von Clients, die einen Haken wieder
+     * entfernen koennen - etwa der Home-Assistant-Integration.
+     */
+    public function uncomplete(Request $request, Task $task)
+    {
+        $this->authorize('update', $task);
+
+        $validated = $request->validate(['planned_at' => 'nullable|date']);
+
+        $task->uncomplete($validated['planned_at'] ?? null);
+
+        return response()->json(['message' => 'Task reopened', 'task' => $task->fresh()]);
+    }
+
     public function skip(Request $request, Task $task)
     {
         $this->authorize('update', $task);

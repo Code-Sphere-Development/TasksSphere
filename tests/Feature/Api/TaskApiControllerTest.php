@@ -585,3 +585,57 @@ test('index returns tasks assigned to me when explicitly asked', function () {
 
     $this->getJson('/api/tasks?include=assigned')->assertOk()->assertJsonCount(1);
 });
+
+test('uncomplete requires authentication', function () {
+    $task = Task::factory()->create();
+
+    $this->postJson("/api/tasks/{$task->id}/uncomplete")->assertUnauthorized();
+});
+
+test('uncomplete reopens a one off task', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $task = Task::factory()->for($user)->create(['recurrence_rule' => null, 'recurrence_timezone' => null]);
+    $task->complete(null, $user);
+
+    $this->postJson("/api/tasks/{$task->id}/uncomplete")->assertOk();
+
+    expect($task->fresh()->completed_at)->toBeNull();
+    expect($task->completions()->count())->toBe(0);
+});
+
+test('uncomplete rewinds a recurring task to the given occurrence', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $task = Task::factory()->for($user)->recurring('daily', 1)->create([
+        'due_at' => '2026-01-23 08:00:00',
+        'recurrence_timezone' => null,
+    ]);
+    $task->complete('2026-01-23 08:00:00', $user);
+
+    $this->postJson("/api/tasks/{$task->id}/uncomplete", ['planned_at' => '2026-01-23 08:00:00'])->assertOk();
+
+    expect($task->fresh()->due_at->format('Y-m-d H:i:s'))->toBe('2026-01-23 08:00:00');
+});
+
+test('uncomplete is forbidden for someone elses task', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $foreign = Task::factory()->create();
+
+    $this->postJson("/api/tasks/{$foreign->id}/uncomplete")->assertForbidden();
+});
+
+test('uncomplete validates the planned date', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $task = Task::factory()->for($user)->create();
+
+    $this->postJson("/api/tasks/{$task->id}/uncomplete", ['planned_at' => 'kein-datum'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('planned_at');
+});
