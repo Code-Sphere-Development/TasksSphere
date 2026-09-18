@@ -178,8 +178,9 @@
         </div>
         @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_21rem] gap-6 lg:gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18rem] gap-6 lg:gap-8">
 
+            {{-- Hauptspalte: ausschliesslich offene Arbeit, nach Dringlichkeit. --}}
             <div class="space-y-8">
                 @if($groups['overdue']->count() > 0)
                     <section>
@@ -214,7 +215,7 @@
                         @forelse($groups['today'] as $occurrence)
                             @include('livewire.partials.task-row')
                         @empty
-                            <div class="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 px-4 py-10 text-center">
+                            <div class="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 px-4 py-8 text-center">
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">
                                     {{ $todayDoneCount > 0 ? __('Heute ist alles erledigt.') : __('Für heute steht nichts an.') }}
                                 </p>
@@ -225,15 +226,41 @@
                         @endforelse
                     </div>
                 </section>
-                @if($completedCompletions->count() > 0)
+
+                {{-- Die kommenden Tage gehoeren in die breite Spalte: es ist offene
+                     Arbeit und muss mit einem Klick abhakbar sein. --}}
+                @foreach($groups['upcoming'] as $group)
                     <section>
-                        <h2 class="text-sm font-bold text-gray-900 dark:text-white">{{ __('Zuletzt erledigt') }}</h2>
+                        <h2 class="flex items-baseline justify-between text-sm font-bold text-gray-900 dark:text-white">
+                            {{ $group['title'] }}
+                            <span class="text-xs font-medium text-gray-400">{{ $group['occurrences']->count() }}</span>
+                        </h2>
+                        <div class="mt-3 space-y-2">
+                            @foreach($group['occurrences'] as $occurrence)
+                                @include('livewire.partials.task-row')
+                            @endforeach
+                        </div>
+                    </section>
+                @endforeach
+            </div>
+
+            {{-- Randspalte: nur Nachrangiges. --}}
+            <aside class="space-y-6 lg:border-l lg:border-gray-100 lg:dark:border-gray-700 lg:pl-6">
+                @include('livewire.partials.task-stack', ['title' => __('Später'), 'occurrences' => $groups['later']])
+                @include('livewire.partials.task-stack', ['title' => __('Ohne Datum'), 'occurrences' => $groups['undated']])
+
+                @if($completedCompletions->count() > 0)
+                    <details class="group">
+                        <summary class="flex cursor-pointer items-baseline justify-between text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                            {{ __('Zuletzt erledigt') }}
+                            <span class="text-xs font-medium text-gray-400">{{ $completedCompletions->count() }}</span>
+                        </summary>
                         <ul class="mt-2 divide-y divide-gray-100 dark:divide-gray-700">
                             @foreach($completedCompletions as $completion)
                                 <li class="py-2 flex items-start gap-2">
                                     <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                     <span class="min-w-0">
-                                        <span class="block truncate text-sm text-gray-500 dark:text-gray-400 line-through">{{ $completion->task->title }}</span>
+                                        <span class="block truncate text-sm text-gray-500 dark:text-gray-400 line-through">{{ $completion->task->displayTitle }}</span>
                                         <span class="block text-xs text-gray-400">
                                             {{ $completion->completed_at->diffForHumans() }}@if($completion->completedBy), {{ $completion->completedBy->name }}@endif
                                         </span>
@@ -241,16 +268,8 @@
                                 </li>
                             @endforeach
                         </ul>
-                    </section>
+                    </details>
                 @endif
-            </div>
-
-            <aside class="space-y-6 lg:border-l lg:border-gray-100 lg:dark:border-gray-700 lg:pl-6">
-                @include('livewire.partials.task-week', ['days' => $groups['upcoming']])
-
-                @include('livewire.partials.task-stack', ['title' => __('Später'), 'occurrences' => $groups['later']])
-                @include('livewire.partials.task-stack', ['title' => __('Ohne Datum'), 'occurrences' => $groups['undated']])
-
             </aside>
         </div>
     </div>

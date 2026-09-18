@@ -479,3 +479,55 @@ test('a leading reference is shown apart from the title', function () {
         ->test(TaskManager::class)
         ->assertSeeInOrder(['FamilyNetwork#14', 'Einkaufsliste ergänzen']);
 });
+
+test('upcoming tasks appear in the main column with a complete control', function () {
+    $user = User::factory()->create();
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'title' => 'Zahnarzttermin',
+        'due_at' => now()->addDay()->setTime(10, 15),
+        'is_archived' => false,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->assertSee('Zahnarzttermin')
+        ->assertSeeHtml('wire:click="completeTask('.$task->id);
+});
+
+test('a task in the sidebar can be completed in one step', function () {
+    $user = User::factory()->create();
+    $task = Task::factory()->create([
+        'user_id' => $user->id,
+        'title' => 'Versicherung kündigen',
+        'due_at' => now()->addDays(20)->setTime(12, 0),
+        'is_archived' => false,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(TaskManager::class)
+        ->assertSeeHtml('wire:click="completeTask('.$task->id)
+        ->call('completeTask', $task->id)
+        ->assertOk();
+
+    expect($task->fresh()->completed_at)->not->toBeNull();
+});
+
+test('completed tasks no longer occupy the main column', function () {
+    app()->setLocale('de');
+
+    $user = User::factory()->create();
+    Task::factory()->create([
+        'user_id' => $user->id,
+        'title' => 'Paket abholen',
+        'due_at' => now()->subHour(),
+        'is_archived' => false,
+    ])->complete(null, $user);
+
+    $html = Livewire::actingAs($user)->test(TaskManager::class)->html();
+
+    // Der Abschnitt steckt jetzt in einem zugeklappten details-Element.
+    expect($html)->toContain('<details');
+    $before = substr($html, 0, strpos($html, 'Zuletzt erledigt'));
+    expect($before)->toContain('<aside');
+});
