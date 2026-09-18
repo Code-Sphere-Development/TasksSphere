@@ -5,11 +5,11 @@
             <div>
                 <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">{{ __('Listen') }}</h1>
                 <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                    <a href="{{ route('dashboard') }}" wire:navigate class="text-blue-600 dark:text-blue-400 hover:underline">{{ __('Aufgaben') }}</a>
+                    <a href="{{ route('dashboard') }}" wire:navigate class="text-brand-600 dark:text-brand-400 hover:underline">{{ __('Aufgaben') }}</a>
                 </p>
             </div>
             <div class="mt-4 md:mt-0">
-                <button type="button" wire:click="showCreateForm" class="inline-flex items-center px-4 py-2 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                <button type="button" wire:click="showCreateForm" class="inline-flex items-center px-4 py-2 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all">
                     <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     {{ __('Neue Liste') }}
                 </button>
@@ -21,7 +21,7 @@
         <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden mb-10 transition-all border border-gray-100 dark:border-gray-700">
             <div class="p-6 sm:p-8">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 p-2 rounded-lg mr-3">
+                    <span class="bg-brand-100 dark:bg-brand-900 text-brand-600 dark:text-brand-300 p-2 rounded-lg mr-3">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                     </span>
                     {{ $isEditing ? __('Liste bearbeiten') : __('Neue Liste erstellen') }}
@@ -31,14 +31,14 @@
                     <!-- Title -->
                     <div>
                         <label for="title" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Titel') }}</label>
-                        <input type="text" id="title" wire:model="title" placeholder="{{ __('z.B. Einkaufsliste') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
+                        <input type="text" id="title" wire:model="title" placeholder="{{ __('z.B. Einkaufsliste') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3">
                         @error('title') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Description -->
                     <div>
                         <label for="description" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Beschreibung (optional)') }}</label>
-                        <textarea id="description" wire:model="description" rows="2" placeholder="{{ __('Weitere Informationen...') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3"></textarea>
+                        <textarea id="description" wire:model="description" rows="2" placeholder="{{ __('Weitere Informationen...') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3"></textarea>
                     </div>
 
                     <!-- Type Selector (Radio Cards) -->
@@ -46,7 +46,7 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('Listentyp') }}</label>
                         <div class="grid grid-cols-2 gap-4">
-                            <label class="relative flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all {{ $type === 'checklist' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}">
+                            <label class="relative flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all {{ $type === 'checklist' ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}">
                                 <input type="radio" wire:model.live="type" value="checklist" class="sr-only">
                                 <div class="flex items-center space-x-3">
                                     <span class="text-2xl">&#10003;</span>
@@ -56,7 +56,7 @@
                                     </div>
                                 </div>
                             </label>
-                            <label class="relative flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all {{ $type === 'tasks' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}">
+                            <label class="relative flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all {{ $type === 'tasks' ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}">
                                 <input type="radio" wire:model.live="type" value="tasks" class="sr-only">
                                 <div class="flex items-center space-x-3">
                                     <span class="text-2xl">&#128203;</span>
@@ -75,7 +75,7 @@
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('Symbol (optional)') }}</label>
                         <div class="flex flex-wrap gap-2">
                             @foreach(['&#128203;', '&#128221;', '&#128218;', '&#127919;', '&#11088;', '&#10084;&#65039;', '&#127968;', '&#128176;', '&#127828;', '&#9992;&#65039;', '&#128170;', '&#127911;', '&#128218;', '&#128640;', '&#127793;', '&#128161;', '&#127881;', '&#128736;&#65039;', '&#128293;', '&#128142;'] as $emoji)
-                                <button type="button" wire:click="$set('icon', '{{ $emoji }}')" class="w-10 h-10 flex items-center justify-center text-xl rounded-lg border-2 transition-all {{ $icon === $emoji ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 scale-110' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}">
+                                <button type="button" wire:click="$set('icon', '{{ $emoji }}')" class="w-10 h-10 flex items-center justify-center text-xl rounded-lg border-2 transition-all {{ $icon === $emoji ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 scale-110' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}">
                                     {!! $emoji !!}
                                 </button>
                             @endforeach
@@ -92,7 +92,7 @@
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{{ __('Farbe (optional)') }}</label>
                         <div class="flex flex-wrap gap-2">
                             @foreach(['#EF4444', '#F97316', '#F59E0B', '#84CC16', '#22C55E', '#14B8A6', '#06B6D4', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#F43F5E'] as $swatch)
-                                <button type="button" wire:click="$set('color', '{{ $swatch }}')" class="w-8 h-8 rounded-full border-2 transition-all {{ $color === $swatch ? 'border-gray-900 dark:border-white scale-125 ring-2 ring-offset-2 ring-blue-500' : 'border-transparent hover:scale-110' }}" style="background-color: {{ $swatch }}"></button>
+                                <button type="button" wire:click="$set('color', '{{ $swatch }}')" class="w-8 h-8 rounded-full border-2 transition-all {{ $color === $swatch ? 'border-gray-900 dark:border-white scale-125 ring-2 ring-offset-2 ring-brand-500' : 'border-transparent hover:scale-110' }}" style="background-color: {{ $swatch }}"></button>
                             @endforeach
                             @if($color)
                                 <button type="button" wire:click="$set('color', '')" class="w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-all">
@@ -107,7 +107,7 @@
                         <button type="button" wire:click="resetForm" class="inline-flex items-center justify-center px-8 py-3 border border-gray-300 dark:border-gray-600 text-base font-bold rounded-xl shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all">
                             {{ __('Abbrechen') }}
                         </button>
-                        <button type="submit" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-xl shadow-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform hover:-translate-y-0.5">
+                        <button type="submit" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-xl shadow-lg text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all transform hover:-translate-y-0.5">
                             {{ $isEditing ? __('Änderungen speichern') : __('Liste erstellen') }}
                         </button>
                     </div>
@@ -118,10 +118,10 @@
 
         <!-- My Lists -->
         <section class="mb-12">
-            <h2 class="text-sm font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 flex items-center px-2 mb-4">
-                <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-2"></span>
+            <h2 class="text-sm font-black uppercase tracking-widest text-brand-600 dark:text-brand-400 flex items-center px-2 mb-4">
+                <span class="w-1.5 h-1.5 rounded-full bg-brand-500 mr-2"></span>
                 {{ __('Meine Listen') }}
-                <span class="ml-2 px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 rounded-full font-bold">
+                <span class="ml-2 px-2 py-0.5 text-xs bg-brand-100 dark:bg-brand-900/30 rounded-full font-bold">
                     {{ $myLists->count() }}
                 </span>
             </h2>
@@ -153,7 +153,7 @@
                                 </div>
                             </a>
                             <div class="flex items-center justify-end px-5 pb-3 -mt-1 space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button wire:click="editList({{ $list->id }})" class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all">
+                                <button wire:click="editList({{ $list->id }})" class="p-2 text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-all">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                                 </button>
                                 <button wire:click="deleteList({{ $list->id }})" wire:confirm="{{ __('Liste wirklich löschen?') }}" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">

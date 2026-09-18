@@ -8,7 +8,7 @@
                     {{ __('Wer hier Mitglied ist, kann Aufgaben zugewiesen bekommen.') }}
                 </p>
             </div>
-            <a href="{{ route('dashboard') }}" class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
+            <a href="{{ route('dashboard') }}" class="text-sm font-medium text-brand-600 dark:text-brand-400 hover:underline">
                 {{ __('Zu den Aufgaben') }}
             </a>
         </div>
@@ -19,8 +19,8 @@
             </label>
             <div class="mt-2 flex flex-col sm:flex-row gap-3">
                 <input id="household-name" type="text" wire:model="name" placeholder="{{ __('Name des Haushalts') }}"
-                       class="flex-grow border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-3">
-                <button type="submit" class="inline-flex justify-center items-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition-all">
+                       class="flex-grow border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 sm:text-sm p-3">
+                <button type="submit" class="inline-flex justify-center items-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl shadow-sm text-white bg-brand-600 hover:bg-brand-700 transition-all">
                     {{ __('Anlegen') }}
                 </button>
             </div>
@@ -52,7 +52,7 @@
                             <div class="min-w-0">
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $member->name }}</span>
                                 @if($member->id === $household->owner_id)
-                                    <span class="ml-2 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                    <span class="ml-2 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400">
                                         {{ __('Besitzer') }}
                                     </span>
                                 @endif
@@ -72,7 +72,7 @@
                 @if($isOwner)
                     <form wire:submit="addMember({{ $household->id }})" class="mt-4 flex flex-col sm:flex-row gap-3">
                         <input type="email" wire:model="inviteEmail" placeholder="{{ __('E-Mail-Adresse') }}"
-                               class="flex-grow border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-3">
+                               class="flex-grow border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 sm:text-sm p-3">
                         <button type="submit" class="inline-flex justify-center items-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-sm font-bold rounded-xl shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all">
                             {{ __('Hinzufügen') }}
                         </button>

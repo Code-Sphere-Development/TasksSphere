@@ -2,7 +2,7 @@
     <div class="max-w-3xl mx-auto">
         <!-- Header -->
         <div class="mb-8">
-            <a href="{{ route('lists.index') }}" wire:navigate class="inline-flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors mb-4">
+            <a href="{{ route('lists.index') }}" wire:navigate class="inline-flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors mb-4">
                 <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 {{ __('Alle Listen') }}
             </a>
@@ -31,11 +31,11 @@
                                 {{-- Inline Edit --}}
                                 <div class="w-full py-1">
                                     <form wire:submit.prevent="saveEditItem" class="space-y-3">
-                                        <input type="text" wire:model="editingItemTitle" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3" autofocus>
+                                        <input type="text" wire:model="editingItemTitle" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3" autofocus>
                                         @error('editingItemTitle') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                                        <textarea wire:model="editingItemNote" rows="2" placeholder="{{ __('Notiz (optional)') }}" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3"></textarea>
+                                        <textarea wire:model="editingItemNote" rows="2" placeholder="{{ __('Notiz (optional)') }}" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3"></textarea>
                                         <div class="flex space-x-2">
-                                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-all">
+                                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-bold rounded-xl text-white bg-brand-600 hover:bg-brand-700 transition-all">
                                                 {{ __('Speichern') }}
                                             </button>
                                             <button type="button" wire:click="cancelEditItem" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-bold rounded-xl text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all">
@@ -46,7 +46,7 @@
                                 </div>
                             @else
                                 {{-- Normal Item --}}
-                                <button wire:click="toggleItem({{ $item->id }})" class="flex-shrink-0 mt-0.5 h-6 w-6 rounded-full border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 flex items-center justify-center transition-all">
+                                <button wire:click="toggleItem({{ $item->id }})" class="flex-shrink-0 mt-0.5 h-6 w-6 rounded-full border-2 border-gray-300 dark:border-gray-600 hover:border-brand-500 dark:hover:border-brand-400 flex items-center justify-center transition-all">
                                 </button>
                                 <div class="ml-3 flex-grow min-w-0 cursor-pointer" wire:click="startEditItem({{ $item->id }})">
                                     <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $item->title }}</span>
@@ -85,7 +85,7 @@
                             <div class="divide-y divide-gray-100 dark:divide-gray-700">
                                 @foreach($completedItems as $item)
                                     <div class="group flex items-center px-5 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-all">
-                                        <button wire:click="toggleItem({{ $item->id }})" class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center transition-all">
+                                        <button wire:click="toggleItem({{ $item->id }})" class="flex-shrink-0 h-6 w-6 rounded-full bg-brand-500 flex items-center justify-center transition-all">
                                             <svg class="h-3.5 w-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                         </button>
                                         <span class="ml-3 flex-grow text-sm text-gray-400 dark:text-gray-500 line-through">{{ $item->title }}</span>
@@ -136,8 +136,8 @@
                 </div>
             @else
                 <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-3xl border-2 border-dashed border-gray-100 dark:border-gray-700 shadow-sm">
-                    <div class="bg-blue-50 dark:bg-blue-900/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <svg class="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    <div class="bg-brand-50 dark:bg-brand-900/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <svg class="h-8 w-8 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                     </div>
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ __('Keine Aufgaben zugeordnet') }}</h3>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Ordne Aufgaben dieser Liste zu.') }}</p>
@@ -146,7 +146,7 @@
 
             {{-- Assign Task Button + Picker --}}
             <div class="mt-6">
-                <button wire:click="$toggle('showTaskPicker')" class="inline-flex items-center px-4 py-2 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                <button wire:click="$toggle('showTaskPicker')" class="inline-flex items-center px-4 py-2 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all">
                     <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     {{ __('Aufgabe zuordnen') }}
                 </button>
@@ -156,7 +156,7 @@
                         @if($availableTasks->count() > 0)
                             <div class="divide-y divide-gray-100 dark:divide-gray-700">
                                 @foreach($availableTasks as $task)
-                                    <button wire:click="assignTask({{ $task->id }})" class="w-full text-left px-5 py-3 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                                    <button wire:click="assignTask({{ $task->id }})" class="w-full text-left px-5 py-3 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors">
                                         <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $task->title }}</span>
                                         @if($task->due_at)
                                             <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">{{ $task->due_at->translatedFormat('d.m.Y') }}</span>

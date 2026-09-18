@@ -14,7 +14,7 @@
                 @endphp
                 <li class="flex items-center gap-1">
                     <button type="button" wire:click="showTaskDetail({{ $task->id }}, '{{ $plannedAt }}')"
-                            class="flex-grow min-w-0 flex items-center gap-2 py-2 text-left rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            class="flex-grow min-w-0 flex items-center gap-2 py-2 text-left rounded focus:outline-none focus:ring-2 focus:ring-brand-500">
                         <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full {{ $task->priority?->accentClass() ?? 'bg-gray-200 dark:bg-gray-600' }}" aria-hidden="true"></span>
                         @if($plannedAt)
                             <span class="w-10 flex-shrink-0 tabular-nums text-xs text-gray-500 dark:text-gray-400">{{ $plannedAt->format('H:i') }}</span>

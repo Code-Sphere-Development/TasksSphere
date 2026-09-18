@@ -12,21 +12,21 @@
                         class="p-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </button>
-                <button type="button" wire:click="today" class="ml-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                <button type="button" wire:click="today" class="ml-1 text-sm font-medium text-brand-600 dark:text-brand-400 hover:underline">
                     {{ __('Heute') }}
                 </button>
             </div>
 
             <div class="flex items-center gap-3">
                 @if($people->count() > 1)
-                    <select wire:model.live="personId" class="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2.5">
+                    <select wire:model.live="personId" class="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 sm:text-sm p-2.5">
                         <option value="">{{ __('Alle Personen') }}</option>
                         @foreach($people as $person)
                             <option value="{{ $person->id }}">{{ $person->name }}</option>
                         @endforeach
                     </select>
                 @endif
-                <a href="{{ route('dashboard') }}" class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                <a href="{{ route('dashboard') }}" class="text-sm font-medium text-brand-600 dark:text-brand-400 hover:underline">
                     {{ __('Zu den Aufgaben') }}
                 </a>
             </div>
@@ -49,7 +49,7 @@
                             ])>
                                 <div @class([
                                     'text-xs font-bold mb-1',
-                                    'text-blue-600 dark:text-blue-400' => $day['date']->isToday(),
+                                    'text-brand-600 dark:text-brand-400' => $day['date']->isToday(),
                                     'text-gray-400' => ! $day['date']->isToday() && ! $day['inMonth'],
                                     'text-gray-600 dark:text-gray-300' => ! $day['date']->isToday() && $day['inMonth'],
                                 ])>

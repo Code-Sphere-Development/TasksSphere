@@ -7,7 +7,7 @@
                     <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
                     {{ __('Listen') }}
                 </a>
-                <button type="button" wire:click="showCreateForm" class="inline-flex items-center px-4 py-2 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                <button type="button" wire:click="showCreateForm" class="inline-flex items-center px-4 py-2 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all">
                     <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     {{ __('Neue Aufgabe') }}
                 </button>
@@ -19,7 +19,7 @@
         <div id="create-task-form" class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden mb-10 transition-all border border-gray-100 dark:border-gray-700">
             <div class="p-6 sm:p-8">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 p-2 rounded-lg mr-3">
+                    <span class="bg-brand-100 dark:bg-brand-900 text-brand-600 dark:text-brand-300 p-2 rounded-lg mr-3">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                     </span>
                     {{ $isEditing ? __('Aufgabe bearbeiten') : __('Was steht an?') }}
@@ -29,19 +29,19 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
                             <label for="title" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Titel der Aufgabe') }}</label>
-                            <input type="text" id="title" wire:model="title" placeholder="{{ __('z.B. Wäsche waschen') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
+                            <input type="text" id="title" wire:model="title" placeholder="{{ __('z.B. Wäsche waschen') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3">
                             @error('title') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="md:col-span-2">
                             <label for="description" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Details (optional)') }}</label>
-                            <textarea id="description" wire:model="description" rows="2" placeholder="{{ __('Weitere Informationen...') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3"></textarea>
+                            <textarea id="description" wire:model="description" rows="2" placeholder="{{ __('Weitere Informationen...') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3"></textarea>
                         </div>
 
                         <div x-show="!['daily', 'weekly'].includes($wire.frequency)">
                             <label for="due_at" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Datum & Uhrzeit') }}</label>
                             <div class="mt-1 relative">
-                                <input type="datetime-local" id="due_at" wire:model="due_at" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
+                                <input type="datetime-local" id="due_at" wire:model="due_at" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3">
                             </div>
                             @error('due_at') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
@@ -49,7 +49,7 @@
                         <div x-show="['daily', 'weekly'].includes($wire.frequency)">
                             <label for="due_at_start" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Startet am (optional)') }}</label>
                             <div class="mt-1 relative">
-                                <input type="date" id="due_at_start" wire:model="due_at" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
+                                <input type="date" id="due_at_start" wire:model="due_at" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3">
                             </div>
                             @error('due_at') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                             <p class="mt-1 text-xs text-gray-500">{{ __('Standardmäßig heute.') }}</p>
@@ -62,7 +62,7 @@
                                 <div class="mt-2 flex flex-wrap gap-2">
                                     @foreach($assignablePeople as $person)
                                         <label class="inline-flex items-center px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 cursor-pointer">
-                                            <input type="checkbox" value="{{ $person->id }}" wire:model="assignees" class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                                            <input type="checkbox" value="{{ $person->id }}" wire:model="assignees" class="rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500">
                                             <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $person->name }}</span>
                                         </label>
                                     @endforeach
@@ -71,7 +71,7 @@
 
                             <div>
                                 <label for="rotation_strategy" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Wechsel') }}</label>
-                                <select id="rotation_strategy" wire:model="rotation_strategy" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
+                                <select id="rotation_strategy" wire:model="rotation_strategy" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3">
                                     <option value="">{{ __('Kein Wechsel') }}</option>
                                     @foreach(\App\Enums\TaskRotation::cases() as $case)
                                         <option value="{{ $case->value }}">{{ $case->label() }}</option>
@@ -81,7 +81,7 @@
 
                             <div>
                                 <label for="assigned_to" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Zuständig') }}</label>
-                                <select id="assigned_to" wire:model="assigned_to" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
+                                <select id="assigned_to" wire:model="assigned_to" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3">
                                     <option value="">{{ __('Niemand') }}</option>
                                     @foreach($assignablePeople as $person)
                                         <option value="{{ $person->id }}">{{ $person->name }}</option>
@@ -92,7 +92,7 @@
 
                         <div>
                             <label for="priority" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Priorität') }}</label>
-                            <select id="priority" wire:model="priority" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
+                            <select id="priority" wire:model="priority" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3">
                                 <option value="">{{ __('Keine Priorität') }}</option>
                                 @foreach(\App\Enums\TaskPriority::cases() as $case)
                                     <option value="{{ $case->value }}">{{ $case->label() }}</option>
@@ -103,7 +103,7 @@
                         <div>
                             <div>
                                 <label for="frequency" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Wiederholung') }}</label>
-                                <select id="frequency" wire:model.live="frequency" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
+                                <select id="frequency" wire:model.live="frequency" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3">
                                     <option value="none">{{ __('Einmalig') }}</option>
                                     <option value="hourly">{{ __('Stündlich') }}</option>
                                     <option value="daily">{{ __('Täglich') }}</option>
@@ -115,7 +115,7 @@
 
                         <div>
                             <label for="recurrence_timezone" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Zeitzone') }}</label>
-                            <select id="recurrence_timezone" wire:model.live="recurrence_timezone" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
+                            <select id="recurrence_timezone" wire:model.live="recurrence_timezone" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3">
                                 @foreach(\DateTimeZone::listIdentifiers() as $tz)
                                     <option value="{{ $tz }}">{{ $tz }}</option>
                                 @endforeach
@@ -128,7 +128,7 @@
                             <div class="flex flex-wrap gap-3">
                                 @foreach([1 => 'Mo', 2 => 'Di', 3 => 'Mi', 4 => 'Do', 5 => 'Fr', 6 => 'Sa', 7 => 'So'] as $value => $label)
                                     <label class="relative flex items-center p-3 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                        <input type="checkbox" wire:model="weekdays" value="{{ $value }}" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                        <input type="checkbox" wire:model="weekdays" value="{{ $value }}" class="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded">
                                         <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __($label) }}</span>
                                     </label>
                                 @endforeach
@@ -139,8 +139,8 @@
                             <div class="md:col-span-2">
                                 <label for="newTime" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Uhrzeit(en) für die Wiederholung hinzufügen') }}</label>
                                 <div class="mt-1 flex space-x-2">
-                                    <input type="time" id="newTime" wire:model="newTime" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm p-3">
-                                    <button type="button" wire:click="addTime" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-sm">
+                                    <input type="time" id="newTime" wire:model="newTime" class="block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3">
+                                    <button type="button" wire:click="addTime" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-bold rounded-xl text-white bg-brand-600 hover:bg-brand-700 transition-all shadow-sm">
                                         {{ __('Hinzufügen') }}
                                     </button>
                                 </div>
@@ -152,9 +152,9 @@
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Festgelegte Uhrzeiten pro Intervall:') }}</label>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($times as $index => $time)
-                                    <span class="inline-flex items-center px-3 py-1.5 rounded-xl text-sm font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 border border-blue-200 dark:border-blue-800">
+                                    <span class="inline-flex items-center px-3 py-1.5 rounded-xl text-sm font-bold bg-brand-100 text-brand-800 dark:bg-brand-900/50 dark:text-brand-200 border border-brand-200 dark:border-brand-800">
                                         {{ $time }} {{ __('Uhr') }}
-                                        <button type="button" wire:click="removeTime({{ $index }})" class="ml-2 inline-flex items-center p-0.5 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors">
+                                        <button type="button" wire:click="removeTime({{ $index }})" class="ml-2 inline-flex items-center p-0.5 rounded-lg hover:bg-brand-200 dark:hover:bg-brand-800 transition-colors">
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                         </button>
                                     </span>
@@ -169,7 +169,7 @@
                                 {{ __('Abbrechen') }}
                             </button>
                         @endif
-                        <button type="submit" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-xl shadow-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform hover:-translate-y-0.5">
+                        <button type="submit" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-xl shadow-lg text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all transform hover:-translate-y-0.5">
                             {{ $isEditing ? __('Änderungen speichern') : __('Aufgabe speichern') }}
                         </button>
                     </div>
@@ -219,7 +219,7 @@
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">
                                     {{ $todayDoneCount > 0 ? __('Heute ist alles erledigt.') : __('Für heute steht nichts an.') }}
                                 </p>
-                                <button type="button" wire:click="showCreateForm" class="mt-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                                <button type="button" wire:click="showCreateForm" class="mt-2 text-sm font-medium text-brand-600 dark:text-brand-400 hover:underline">
                                     {{ __('Aufgabe hinzufügen') }}
                                 </button>
                             </div>

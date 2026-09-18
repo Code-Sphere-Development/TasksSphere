@@ -14,7 +14,7 @@
     </time>
 
     <button type="button" wire:click="showTaskDetail({{ $task->id }}, '{{ $plannedAt }}')"
-            class="flex-grow min-w-0 text-left rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            class="flex-grow min-w-0 text-left rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
         {{-- Der Verweis liegt im Textfluss, nicht als eigene Spalte: sonst quetscht
              er auf schmalen Bildschirmen den Titel auf ein Zeichen zusammen. --}}
         <span class="text-[15px] font-semibold text-gray-900 dark:text-white line-clamp-3 sm:line-clamp-2 break-words">
@@ -63,7 +63,7 @@
 
     <div class="hidden sm:flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
         <button type="button" wire:click="editTask({{ $task->id }})" title="{{ __('Bearbeiten') }}"
-                class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                class="p-2 text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 rounded-lg hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
         </button>
         <button type="button" wire:click="deleteTask({{ $task->id }}, '{{ $plannedAt }}')" title="{{ __('Löschen') }}"

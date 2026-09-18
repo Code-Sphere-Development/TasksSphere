@@ -74,7 +74,7 @@
                         <div class="flex justify-between gap-4">
                             <dt class="font-semibold text-gray-500 dark:text-gray-400 flex-shrink-0">{{ __('Liste') }}</dt>
                             <dd class="text-right">
-                                <a href="{{ route('lists.show', $detailTask->taskList) }}" class="text-blue-600 dark:text-blue-400 hover:underline break-words">
+                                <a href="{{ route('lists.show', $detailTask->taskList) }}" class="text-brand-600 dark:text-brand-400 hover:underline break-words">
                                     {{ $detailTask->taskList->title }}
                                 </a>
                             </dd>
