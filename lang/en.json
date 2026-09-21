@@ -137,5 +137,6 @@
     "Aufgabe hinzufügen": "Add a task",
     "{1} :count überfällig|[2,*] :count überfällig": "{1} :count overdue|[2,*] :count overdue",
     "Löschen": "Delete",
-    "Diese Woche": "This week"
+    "Diese Woche": "This week",
+    "Noch nichts erledigt.": "Nothing completed yet."
 }

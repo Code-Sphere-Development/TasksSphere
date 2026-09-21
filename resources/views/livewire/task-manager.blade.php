@@ -242,19 +242,33 @@
                         </div>
                     </section>
                 @endforeach
+
+                @foreach([['title' => __('Später'), 'occurrences' => $groups['later']], ['title' => __('Ohne Datum'), 'occurrences' => $groups['undated']]] as $group)
+                    @if($group['occurrences']->count() > 0)
+                        <section>
+                            <h2 class="flex items-baseline justify-between text-sm font-bold text-gray-900 dark:text-white">
+                                {{ $group['title'] }}
+                                <span class="text-xs font-medium text-gray-400">{{ $group['occurrences']->count() }}</span>
+                            </h2>
+                            <div class="mt-3 space-y-2">
+                                @foreach($group['occurrences'] as $occurrence)
+                                    @include('livewire.partials.task-row')
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
+                @endforeach
             </div>
 
-            {{-- Randspalte: nur Nachrangiges. --}}
-            <aside class="space-y-6 lg:border-l lg:border-gray-100 lg:dark:border-gray-700 lg:pl-6">
-                @include('livewire.partials.task-stack', ['title' => __('Später'), 'occurrences' => $groups['later']])
-                @include('livewire.partials.task-stack', ['title' => __('Ohne Datum'), 'occurrences' => $groups['undated']])
+            {{-- Randspalte: das Erledigte. --}}
+            <aside class="lg:border-l lg:border-gray-100 lg:dark:border-gray-700 lg:pl-6">
+                <section>
+                    <h2 class="flex items-baseline justify-between text-sm font-bold text-gray-900 dark:text-white">
+                        {{ __('Zuletzt erledigt') }}
+                        <span class="text-xs font-medium text-gray-400">{{ $completedCompletions->count() }}</span>
+                    </h2>
 
-                @if($completedCompletions->count() > 0)
-                    <details class="group">
-                        <summary class="flex cursor-pointer items-baseline justify-between text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                            {{ __('Zuletzt erledigt') }}
-                            <span class="text-xs font-medium text-gray-400">{{ $completedCompletions->count() }}</span>
-                        </summary>
+                    @if($completedCompletions->count() > 0)
                         <ul class="mt-2 divide-y divide-gray-100 dark:divide-gray-700">
                             @foreach($completedCompletions as $completion)
                                 <li class="py-2 flex items-start gap-2">
@@ -268,8 +282,10 @@
                                 </li>
                             @endforeach
                         </ul>
-                    </details>
-                @endif
+                    @else
+                        <p class="mt-2 text-sm text-gray-400">{{ __('Noch nichts erledigt.') }}</p>
+                    @endif
+                </section>
             </aside>
         </div>
     </div>

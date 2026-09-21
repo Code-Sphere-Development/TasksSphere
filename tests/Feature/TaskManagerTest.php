@@ -495,7 +495,7 @@ test('upcoming tasks appear in the main column with a complete control', functio
         ->assertSeeHtml('wire:click="completeTask('.$task->id);
 });
 
-test('a task in the sidebar can be completed in one step', function () {
+test('a later task can be completed in one step', function () {
     $user = User::factory()->create();
     $task = Task::factory()->create([
         'user_id' => $user->id,
@@ -526,8 +526,22 @@ test('completed tasks no longer occupy the main column', function () {
 
     $html = Livewire::actingAs($user)->test(TaskManager::class)->html();
 
-    // Der Abschnitt steckt jetzt in einem zugeklappten details-Element.
-    expect($html)->toContain('<details');
+    // Erledigtes steht in der Randspalte, Offenes in der Hauptspalte.
     $before = substr($html, 0, strpos($html, 'Zuletzt erledigt'));
     expect($before)->toContain('<aside');
+    expect($html)->toContain('Paket abholen');
+});
+
+test('later and undated tasks sit in the main column, not the sidebar', function () {
+    app()->setLocale('de');
+
+    $user = User::factory()->create();
+    Task::factory()->create(['user_id' => $user->id, 'title' => 'Versicherung kündigen', 'due_at' => now()->addDays(20), 'is_archived' => false]);
+    Task::factory()->create(['user_id' => $user->id, 'title' => 'Fahrradschlauch flicken', 'due_at' => null, 'is_archived' => false]);
+
+    $html = Livewire::actingAs($user)->test(TaskManager::class)->html();
+    $asideStart = strpos($html, '<aside');
+
+    expect(strpos($html, 'Versicherung kündigen'))->toBeLessThan($asideStart);
+    expect(strpos($html, 'Fahrradschlauch flicken'))->toBeLessThan($asideStart);
 });

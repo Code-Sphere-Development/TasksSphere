@@ -7,56 +7,31 @@
 | Erscheinungsbild
 |--------------------------------------------------------------------------
 |
-| TasksSphere ist ein gemeinsames Haushaltsbrett, kein Firmen-Dashboard. Das
-| Erscheinungsbild folgt dieser Herkunft: gedecktes Tannengruen als Handlungs-
-| farbe, ein leicht gruenstichiges Papier statt reinem Grau, und eine Schrift
-| mit eigener Zeichnung statt der ueblichen Systemgrotesk.
-|
-| Alles steht hier und nur hier. Wer die Anmutung wechseln will, tauscht diese
-| Werte - die Klassen in den Ansichten bleiben unberuehrt.
+| Die Handlungsfarbe heisst in den Ansichten "brand" und nicht "blue", damit
+| ein Wechsel an genau dieser Stelle moeglich bleibt, ohne eine Klasse in den
+| Ansichten anzufassen. Derzeit zeigt sie auf Tailwinds Blau.
 |
 */
 @theme {
     --font-sans: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
 
-    /* Handlungsfarbe: Tannengruen. Ersetzt das vorherige Tailwind-Blau. */
-    --color-brand-50: #eef4f0;
-    --color-brand-100: #d6e5dc;
-    --color-brand-200: #aecbbb;
-    --color-brand-300: #7fac94;
-    --color-brand-400: #548c71;
-    --color-brand-500: #357055;
-    --color-brand-600: #1b4332;
-    --color-brand-700: #16382a;
-    --color-brand-800: #112c21;
-    --color-brand-900: #0c2018;
-
-    /* Neutrale Toene mit gruenem Stich: setzt die Temperatur der ganzen
-       Anwendung, ohne dass eine einzige Klasse in den Ansichten sich aendert. */
-    --color-gray-50: #eff1ec;
-    --color-gray-100: #dfe4da;
-    --color-gray-200: #c9d1c3;
-    --color-gray-300: #aab5a4;
-    --color-gray-400: #8a9684;
-    --color-gray-500: #6b7767;
-    --color-gray-600: #53604f;
-    --color-gray-700: #3e4a3c;
-    --color-gray-800: #2a3328;
-    --color-gray-900: #17201a;
-
-    /* Zustandsfarben: waermer abgestimmt, damit sie neben dem Gruen nicht
-       schreien. Rot bleibt ein echtes Signalrot - Ueberfaelliges soll auffallen. */
-    --color-red-500: #b3262b;
-    --color-red-600: #9b2226;
-    --color-amber-500: #b07d12;
+    --color-brand-50: var(--color-blue-50);
+    --color-brand-100: var(--color-blue-100);
+    --color-brand-200: var(--color-blue-200);
+    --color-brand-300: var(--color-blue-300);
+    --color-brand-400: var(--color-blue-400);
+    --color-brand-500: var(--color-blue-500);
+    --color-brand-600: var(--color-blue-600);
+    --color-brand-700: var(--color-blue-700);
+    --color-brand-800: var(--color-blue-800);
+    --color-brand-900: var(--color-blue-900);
 }
 
 [x-cloak] {
     display: none;
 }
 
-/* Die Uhrzeiten sollen untereinander fluchten. Bricolage Grotesque bringt
-   Tabellenziffern mit, sie muessen nur eingeschaltet werden. */
+/* Die Uhrzeiten sollen untereinander fluchten. */
 .tabular-nums,
 time {
     font-variant-numeric: tabular-nums;
