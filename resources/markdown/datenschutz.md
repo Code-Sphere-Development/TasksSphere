@@ -1,15 +1,17 @@
 # Datenschutzerklärung
 
-Stand: [[Datum]]
+Stand: 22. September 2026
 
 Diese Erklärung beschreibt, welche personenbezogenen Daten TasksSphere verarbeitet, zu welchem Zweck und auf welcher Grundlage. Sie ist auf das zugeschnitten, was die Anwendung tatsächlich tut.
 
 ## 1. Verantwortlicher
 
-**[[Vor- und Nachname bzw. Firma]]**
-[[Straße und Hausnummer]]
-[[Postleitzahl und Ort]]
-E-Mail: [[E-Mail-Adresse]]
+**Code-Sphere**
+Inhaber: Collin Ilgner
+Mehlpfad 1b
+40789 Monheim am Rhein
+E-Mail: [cilgner@code-sphere.de](mailto:cilgner@code-sphere.de)
+Telefon: 0171 7406484
 
 ## 2. Hosting und Server-Protokolle
 
@@ -43,7 +45,7 @@ Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.
 
 Wenn du Push-Benachrichtigungen aktivierst, wird der Zustellschlüssel deines Geräts zusammen mit einer Geräte-Kennung und dem Zeitpunkt der letzten Aktivität gespeichert. Die Zustellung erfolgt über **Firebase Cloud Messaging** der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Dabei werden der Zustellschlüssel und der Inhalt der Benachrichtigung (Titel der Aufgabe) an Google übermittelt; eine Übermittlung an Server in den USA ist möglich. Google ist unter dem EU-US Data Privacy Framework zertifiziert.
 
-Geräte, die sich länger als [[Anzahl]] Tage nicht gemeldet haben, erhalten keine Benachrichtigungen mehr. Du kannst Push-Benachrichtigungen in den Profileinstellungen abschalten.
+Geräte, die sich länger als 180 Tage nicht gemeldet haben, erhalten keine Benachrichtigungen mehr. Du kannst Push-Benachrichtigungen in den Profileinstellungen abschalten.
 
 Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung, jederzeit widerrufbar).
 
@@ -71,7 +73,7 @@ Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschun
 
 Dein Konto und alle zugehörigen Daten kannst du in den Profileinstellungen selbst löschen.
 
-Du hast außerdem das Recht, dich bei einer Datenschutzaufsichtsbehörde zu beschweren. Zuständig ist [[zuständige Aufsichtsbehörde des Bundeslands]].
+Du hast außerdem das Recht, dich bei einer Datenschutzaufsichtsbehörde zu beschweren. Zuständig ist die Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen, Kavalleriestraße 2–4, 40213 Düsseldorf, [www.ldi.nrw.de](https://www.ldi.nrw.de).
 
 ## 11. Änderungen
 

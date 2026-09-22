@@ -4,26 +4,28 @@ Angaben gemäß § 5 DDG.
 
 ## Anbieter
 
-**[[Vor- und Nachname bzw. Firma]]**
-[[Straße und Hausnummer]]
-[[Postleitzahl und Ort]]
+**Code-Sphere**
+Inhaber: Collin Ilgner
+Mehlpfad 1b
+40789 Monheim am Rhein
 Deutschland
 
 ## Kontakt
 
-E-Mail: [[E-Mail-Adresse]]
-[[Telefonnummer, sofern gewünscht]]
+E-Mail: [cilgner@code-sphere.de](mailto:cilgner@code-sphere.de)
+Telefon: 0171 7406484
 
 ## Verantwortlich für den Inhalt
 
 Verantwortlich nach § 18 Abs. 2 MStV:
 
-[[Vor- und Nachname]]
-[[Anschrift, falls abweichend]]
+Collin Ilgner
+Mehlpfad 1b
+40789 Monheim am Rhein
 
 ## Umsatzsteuer
 
-[[Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG, sofern vorhanden — andernfalls diesen Abschnitt entfernen]]
+Gemäß § 19 UStG wird keine Umsatzsteuer berechnet und ausgewiesen (Kleinunternehmerregelung).
 
 ## Streitbeilegung
 

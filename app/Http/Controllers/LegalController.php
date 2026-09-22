@@ -30,7 +30,10 @@ class LegalController extends Controller
 
         return view('legal', [
             'title' => $title,
-            'content' => Str::markdown($markdown),
+            // Ein Zeilenumbruch im Markdown soll auch einer bleiben: Anschriften
+            // stehen sonst in einer Zeile, weil Markdown einfache Umbrueche zu
+            // Leerzeichen zusammenzieht.
+            'content' => Str::markdown($markdown, ['renderer' => ['soft_break' => "<br>\n"]]),
         ]);
     }
 }

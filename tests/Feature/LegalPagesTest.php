@@ -44,3 +44,9 @@ test('the legal pages link to each other and back home', function () {
     $this->get('/impressum')->assertSee(route('legal.privacy'));
     $this->get('/datenschutz')->assertSee(route('legal.imprint'));
 });
+
+test('line breaks inside the address are preserved', function () {
+    $this->get('/impressum')
+        ->assertSee('Mehlpfad 1b<br>', false)
+        ->assertSee('40789 Monheim am Rhein', false);
+});
