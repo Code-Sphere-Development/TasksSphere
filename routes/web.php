@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LegalController;
 use App\Livewire\HouseholdManager;
 use App\Livewire\ListDetail;
 use App\Livewire\ListManager;
@@ -9,6 +10,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/impressum', [LegalController::class, 'imprint'])->name('legal.imprint');
+Route::get('/datenschutz', [LegalController::class, 'privacy'])->name('legal.privacy');
 
 Route::middleware([
     'auth:sanctum',

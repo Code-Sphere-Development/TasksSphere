@@ -138,5 +138,7 @@
     "{1} :count überfällig|[2,*] :count überfällig": "{1} :count overdue|[2,*] :count overdue",
     "Löschen": "Delete",
     "Diese Woche": "This week",
-    "Noch nichts erledigt.": "Nothing completed yet."
+    "Noch nichts erledigt.": "Nothing completed yet.",
+    "Impressum": "Legal notice",
+    "Datenschutz": "Privacy"
 }
