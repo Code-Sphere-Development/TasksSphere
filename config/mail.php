@@ -110,6 +110,19 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Kontaktformular
+    |--------------------------------------------------------------------------
+    |
+    | Wohin Nachrichten aus dem Kontaktformular gehen.
+    |
+    */
+
+    'contact' => [
+        'to' => env('MAIL_CONTACT_TO', 'cilgner@code-sphere.de'),
+    ],
+
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name' => env('MAIL_FROM_NAME', 'Example'),

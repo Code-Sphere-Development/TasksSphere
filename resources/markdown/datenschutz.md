@@ -63,11 +63,17 @@ Zur Erkennung technischer Fehler nutzen wir **Sentry** (Functional Software Inc.
 
 Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einem fehlerfreien Betrieb).
 
-## 9. Mobile App
+## 9. Kontaktformular
+
+Wenn du uns über das Kontaktformular schreibst, werden Name, E-Mail-Adresse und Nachricht per E-Mail an uns übermittelt und dort gespeichert, bis die Anfrage erledigt ist. Die Zustellung erfolgt über den E-Mail-Dienst von [[E-Mail-Anbieter, Ort]]. Zum Schutz vor automatisierten Einträgen ist die Zahl der Nachrichten je Adresse begrenzt; dafür wird die IP-Adresse kurzzeitig verarbeitet.
+
+Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Beantwortung deiner Anfrage) bzw. lit. f (Schutz vor Missbrauch).
+
+## 10. Mobile App
 
 Für die mobile App gilt diese Erklärung entsprechend. Zusätzlich wird bei der Anmeldung eine Geräte-Kennung übermittelt, um Push-Benachrichtigungen zustellen zu können (siehe Abschnitt 6).
 
-## 10. Deine Rechte
+## 11. Deine Rechte
 
 Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21). Eine erteilte Einwilligung kannst du jederzeit mit Wirkung für die Zukunft widerrufen.
 
@@ -75,6 +81,6 @@ Dein Konto und alle zugehörigen Daten kannst du in den Profileinstellungen selb
 
 Du hast außerdem das Recht, dich bei einer Datenschutzaufsichtsbehörde zu beschweren. Zuständig ist die Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen, Kavalleriestraße 2–4, 40213 Düsseldorf, [www.ldi.nrw.de](https://www.ldi.nrw.de).
 
-## 11. Änderungen
+## 12. Änderungen
 
 Diese Erklärung wird angepasst, wenn sich die Anwendung oder die Rechtslage ändert. Es gilt die jeweils hier veröffentlichte Fassung.

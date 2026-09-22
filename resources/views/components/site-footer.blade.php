@@ -3,5 +3,6 @@
     <nav class="inline-flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
         <a href="{{ route('legal.imprint') }}" class="hover:text-gray-900 dark:hover:text-white hover:underline">{{ __('Impressum') }}</a>
         <a href="{{ route('legal.privacy') }}" class="hover:text-gray-900 dark:hover:text-white hover:underline">{{ __('Datenschutz') }}</a>
+        <a href="{{ route('contact.show') }}" class="hover:text-gray-900 dark:hover:text-white hover:underline">{{ __('Kontakt') }}</a>
     </nav>
 </footer>

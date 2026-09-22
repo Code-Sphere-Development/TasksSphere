@@ -140,5 +140,16 @@
     "Diese Woche": "This week",
     "Noch nichts erledigt.": "Nothing completed yet.",
     "Impressum": "Legal notice",
-    "Datenschutz": "Privacy"
+    "Datenschutz": "Privacy",
+    "Kontakt": "Contact",
+    "Kontaktanfrage": "Contact request",
+    "Kontaktanfrage von :name": "Contact request from :name",
+    "Von": "From",
+    "Antworten gehen direkt an den Absender.": "Replies go straight to the sender.",
+    "Schreib uns, wir antworten per E-Mail an die Adresse, die du hier angibst.": "Write to us; we reply by email to the address you give here.",
+    "Nachricht": "Message",
+    "Website": "Website",
+    "Deine Angaben werden nur zur Beantwortung deiner Anfrage verwendet.": "Your details are used only to answer your request.",
+    "Nachricht senden": "Send message",
+    "Deine Nachricht ist angekommen. Wir melden uns per E-Mail.": "Your message has arrived. We will get back to you by email."
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\LegalController;
 use App\Livewire\HouseholdManager;
 use App\Livewire\ListDetail;
@@ -13,6 +14,13 @@ Route::get('/', function () {
 
 Route::get('/impressum', [LegalController::class, 'imprint'])->name('legal.imprint');
 Route::get('/datenschutz', [LegalController::class, 'privacy'])->name('legal.privacy');
+
+Route::get('/kontakt', [ContactController::class, 'show'])->name('contact.show');
+// Fuenf Nachrichten je zehn Minuten und Adresse reichen fuer Menschen und
+// bremsen Bots, die den Honigtopf umgehen.
+Route::post('/kontakt', [ContactController::class, 'send'])
+    ->middleware('throttle:5,10')
+    ->name('contact.send');
 
 Route::middleware([
     'auth:sanctum',

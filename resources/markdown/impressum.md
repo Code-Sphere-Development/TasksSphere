@@ -14,6 +14,7 @@ Deutschland
 
 E-Mail: [cilgner@code-sphere.de](mailto:cilgner@code-sphere.de)
 Telefon: 0171 7406484
+Oder über das [Kontaktformular](/kontakt).
 
 ## Verantwortlich für den Inhalt
 
