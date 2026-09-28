@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class TaskApiController extends Controller
@@ -118,8 +119,19 @@ class TaskApiController extends Controller
             $task->assignTo(User::findOrFail($assignedTo), $request->user());
         }
 
+        // Der Push haengt an fremder Infrastruktur. Scheitert schon das
+        // Einreihen, ist die Aufgabe trotzdem angelegt - eine Fehlerantwort
+        // waere dann falsch und verleitet den Aufrufer zum Doppelanlegen.
         if ($request->boolean('notify')) {
-            Auth::user()->notify(new TaskReminderNotification($task));
+            try {
+                Auth::user()->notify(new TaskReminderNotification($task));
+            } catch (\Throwable $e) {
+                Log::error('Erinnerung zu Aufgabe '.$task->id.' konnte nicht zugestellt werden: '.$e->getMessage(), [
+                    'task_id' => $task->id,
+                    'user_id' => Auth::id(),
+                    'exception' => $e,
+                ]);
+            }
         }
 
         return $task;

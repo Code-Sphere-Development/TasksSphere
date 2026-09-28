@@ -4,12 +4,19 @@ namespace App\Notifications;
 
 use App\Models\Task;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
 use NotificationChannels\Fcm\Resources\Notification as FcmNotification;
 
-class TaskReminderNotification extends Notification
+/**
+ * Der Versand laeuft ueber die Warteschlange: Ein nicht erreichbares FCM
+ * darf weder den Aufruf der Schnittstelle noch den Erinnerungslauf aufhalten.
+ * Fehlgeschlagene Zustellungen landen in failed_jobs statt in einer
+ * Fehlerantwort.
+ */
+class TaskReminderNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
