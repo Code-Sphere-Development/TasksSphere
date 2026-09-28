@@ -6,6 +6,7 @@ use App\Enums\TaskRotation;
 use App\Enums\TaskSource;
 use App\Models\Task;
 use App\Models\TaskCompletion;
+use App\Models\TaskList;
 use App\Models\User;
 use App\Support\People\PeopleDirectory;
 use Illuminate\Contracts\View\Factory;
@@ -29,6 +30,8 @@ class TaskManager extends Component
     public array $assignees = [];
 
     public $rotation_strategy = '';
+
+    public $task_list_id = '';
 
     public $due_at;
 
@@ -74,6 +77,9 @@ class TaskManager extends Component
             'assignees' => 'array',
             'assignees.*' => ['integer', Rule::in($this->assignablePeople()->pluck('id'))],
             'rotation_strategy' => ['nullable', Rule::enum(TaskRotation::class)],
+            'task_list_id' => ['nullable', 'integer', Rule::exists('task_lists', 'id')
+                ->where('user_id', Auth::id())
+                ->whereNull('deleted_at')],
             'due_at' => 'nullable|date',
             'frequency' => 'required|in:none,hourly,daily,weekly,monthly',
             'interval' => 'required|integer|min:1',
@@ -94,6 +100,26 @@ class TaskManager extends Component
                 ->mapWithKeys(fn ($id) => [(int) $id => ['assigned_by' => Auth::id()]])
                 ->all()
         );
+    }
+
+    /**
+     * Zur Wahl stehen die eigenen Aufgabenlisten. Liegt die bearbeitete
+     * Aufgabe in einer Checkliste - ueber die Schnittstelle ist das moeglich -
+     * kommt diese dazu, sonst ginge die Zuordnung beim Speichern still
+     * verloren.
+     */
+    private function assignableLists(): Collection
+    {
+        return TaskList::forUser(Auth::id())
+            ->where(function ($query) {
+                $query->where('type', 'tasks');
+
+                if ($this->task_list_id !== '' && $this->task_list_id !== null) {
+                    $query->orWhere('id', (int) $this->task_list_id);
+                }
+            })
+            ->orderBy('title')
+            ->get();
     }
 
     private function assignablePeople(): Collection
@@ -183,6 +209,7 @@ class TaskManager extends Component
             'completedCompletions' => $completedCompletions,
             'detailTask' => $this->detailTaskId ? $allTasks->firstWhere('id', $this->detailTaskId) : null,
             'assignablePeople' => $this->assignablePeople(),
+            'assignableLists' => $this->assignableLists(),
         ]);
     }
 
@@ -282,6 +309,7 @@ class TaskManager extends Component
             'recurrence_rule' => $recurrence_rule,
             'recurrence_timezone' => $this->recurrence_timezone,
             'rotation_strategy' => $this->rotation_strategy ?: null,
+            'task_list_id' => $this->task_list_id !== '' ? (int) $this->task_list_id : null,
             'source' => TaskSource::Manual,
         ]);
 
@@ -291,7 +319,7 @@ class TaskManager extends Component
             $task->assignTo(User::findOrFail((int) $this->assigned_to), Auth::user());
         }
 
-        $this->reset(['title', 'description', 'priority', 'assigned_to', 'assignees', 'rotation_strategy', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'showForm']);
+        $this->reset(['title', 'description', 'priority', 'assigned_to', 'assignees', 'rotation_strategy', 'task_list_id', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'showForm']);
     }
 
     public function editTask($taskId): void
@@ -304,6 +332,7 @@ class TaskManager extends Component
         $this->assigned_to = $task->assigned_to ?? '';
         $this->assignees = $task->assignees->pluck('id')->all();
         $this->rotation_strategy = $task->rotation_strategy?->value ?? '';
+        $this->task_list_id = $task->task_list_id ?? '';
         $this->due_at = $task->due_at ? $task->due_at->format('Y-m-d\TH:i') : null;
 
         if ($task->isRecurring()) {
@@ -349,6 +378,7 @@ class TaskManager extends Component
             'recurrence_rule' => $recurrence_rule,
             'recurrence_timezone' => $this->recurrence_timezone,
             'rotation_strategy' => $this->rotation_strategy ?: null,
+            'task_list_id' => $this->task_list_id !== '' ? (int) $this->task_list_id : null,
         ]);
 
         $this->syncAssignees($task);
@@ -364,7 +394,7 @@ class TaskManager extends Component
 
     public function cancelEdit(): void
     {
-        $this->reset(['title', 'description', 'priority', 'assigned_to', 'assignees', 'rotation_strategy', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'isEditing', 'editingTask', 'showForm']);
+        $this->reset(['title', 'description', 'priority', 'assigned_to', 'assignees', 'rotation_strategy', 'task_list_id', 'due_at', 'frequency', 'interval', 'times', 'weekdays', 'newTime', 'isEditing', 'editingTask', 'showForm']);
     }
 
     public function completeTask($taskId, $plannedAt = null): void

@@ -90,6 +90,19 @@
                             </div>
                         @endif
 
+                        @if($assignableLists->isNotEmpty())
+                            <div>
+                                <label for="task_list_id" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Liste') }}</label>
+                                <select id="task_list_id" wire:model="task_list_id" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3">
+                                    <option value="">{{ __('Keine Liste') }}</option>
+                                    @foreach($assignableLists as $list)
+                                        <option value="{{ $list->id }}">{{ $list->title }}</option>
+                                    @endforeach
+                                </select>
+                                @error('task_list_id') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                            </div>
+                        @endif
+
                         <div>
                             <label for="priority" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Priorität') }}</label>
                             <select id="priority" wire:model="priority" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl shadow-sm focus:ring-brand-500 focus:border-brand-500 transition-colors sm:text-sm p-3">

@@ -639,3 +639,34 @@ test('uncomplete validates the planned date', function () {
         ->assertUnprocessable()
         ->assertJsonValidationErrors('planned_at');
 });
+
+test('store puts the task into a list of the authenticated user', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $list = TaskList::factory()->tasks()->create(['user_id' => $user->id]);
+
+    $this->postJson('/api/tasks', ['title' => 'In der Liste', 'task_list_id' => $list->id])
+        ->assertCreated()
+        ->assertJsonPath('task_list_id', $list->id);
+});
+
+test('store rejects a task list owned by another user', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $foreignList = TaskList::factory()->create();
+
+    $this->postJson('/api/tasks', ['title' => 'Fremd', 'task_list_id' => $foreignList->id])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('task_list_id');
+});
+
+test('store works without a task list', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $this->postJson('/api/tasks', ['title' => 'Ohne Liste'])
+        ->assertCreated()
+        ->assertJsonPath('task_list_id', null);
+});

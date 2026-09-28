@@ -89,6 +89,11 @@ class TaskApiController extends Controller
             'recurrence_rule.weekdays' => 'nullable|array',
             'recurrence_rule.weekdays.*' => 'integer|min:1|max:7',
             'recurrence_timezone' => 'nullable|string|timezone',
+            // Besitzerbezug wie in update(): sonst liesse sich die neue
+            // Aufgabe in einer fremden Liste ablegen.
+            'task_list_id' => ['nullable', 'integer', Rule::exists('task_lists', 'id')
+                ->where('user_id', Auth::id())
+                ->whereNull('deleted_at')],
             'notify' => 'nullable|boolean',
         ]);
 
