@@ -5,7 +5,6 @@ use App\Models\ListItem;
 use App\Models\Task;
 use App\Models\TaskList;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
@@ -161,9 +160,12 @@ test('toggleItem rejects an item from a different list', function () {
 
     $this->actingAs($user);
 
-    expect(fn () => Livewire::test(ListDetail::class, ['taskList' => $list])
+    // Livewire renders the ModelNotFoundException as a 404 response in tests.
+    Livewire::test(ListDetail::class, ['taskList' => $list])
         ->call('toggleItem', $foreignItem->id)
-    )->toThrow(ModelNotFoundException::class);
+        ->assertNotFound();
+
+    expect($foreignItem->fresh()->is_completed)->toBeFalse();
 });
 
 // --- editing ---
@@ -326,9 +328,11 @@ test('assignTask rejects a task owned by another user', function () {
 
     $this->actingAs($user);
 
-    expect(fn () => Livewire::test(ListDetail::class, ['taskList' => $list])
+    Livewire::test(ListDetail::class, ['taskList' => $list])
         ->call('assignTask', $foreignTask->id)
-    )->toThrow(ModelNotFoundException::class);
+        ->assertNotFound();
+
+    expect($foreignTask->fresh()->task_list_id)->toBeNull();
 });
 
 test('removeTask detaches the task from the list', function () {
