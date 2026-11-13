@@ -29,6 +29,8 @@
         @endif
 
         <span class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+            <x-task-id :id="$task->id" />
+
             @if($isOverdue)
                 <span class="font-semibold text-red-600 dark:text-red-400">{{ $plannedAt->diffForHumans() }}</span>
             @endif
