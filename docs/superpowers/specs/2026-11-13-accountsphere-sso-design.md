@@ -90,8 +90,12 @@ von den Schwesterprojekten sind unten begründet.
   Proxy-Logins kommen von der IP des TasksSphere-Servers und teilen sich dieses Kontingent.
 - Die Sprache ist lokal per API änderbar, wird aber beim nächsten Login wieder aus AccountSphere
   übernommen.
-- Fehler im OAuth-Rückweg leitet das Paket auf `/login` um, das sofort wieder zu AccountSphere
-  weiterleitet; die Fehlermeldung ist daher nicht sichtbar (wie in den Schwesterprojekten).
+- Fehler im OAuth-Rückweg leitet das Paket auf `/login` um. Dessen eigene Route schickte sofort
+  wieder zu AccountSphere, das einen angemeldeten Nutzer ohne Rückfrage zurückleitet – eine
+  Endlosschleife, z. B. bei nicht erlaubtem Kontotyp. TasksSphere ersetzt die Route daher
+  (`LoginController`, `register_login_route` in `config/codesphere.php` auf `false`): ohne Fehler
+  geht es weiter direkt zu AccountSphere, mit Fehler wird die Meldung angezeigt, samt
+  „Mit anderem Konto anmelden“ über `/oauth/logout`.
 - Ein Konto, das noch nie angemeldet und nicht gekoppelt war, zeigt den letzten lokalen Namen.
 - `/api/login`-Tokens aus AccountSphere sind Personal Access Tokens ohne Refresh; TasksSphere
   braucht sie nach dem Login nicht mehr.

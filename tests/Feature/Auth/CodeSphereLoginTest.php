@@ -34,6 +34,29 @@ test('the login route starts the AccountSphere flow', function () {
         ->assertRedirectContains('https://account.code-sphere.de/oauth/authorize');
 });
 
+test('a failed login shows the error instead of looping back to AccountSphere', function () {
+    config(['codesphere.allowed_account_types' => ['private'], 'codesphere.client_id' => 'client-1']);
+
+    $this->withHeader('Accept-Language', 'de');
+
+    completeCodeSphereLogin($this, [
+        'id' => 7,
+        'name' => 'Jane Doe',
+        'email' => 'jane@example.com',
+        'language' => 'de',
+        'account_type' => 'business',
+    ])->assertRedirect(route('login'));
+
+    $this->assertGuest();
+
+    $this->followingRedirects()
+        ->get('/login')
+        ->assertOk()
+        ->assertSee('Mit diesem Kontotyp kannst du TasksSphere nicht nutzen.')
+        ->assertSee(route('codesphere.redirect'))
+        ->assertSee('https://account.code-sphere.de/oauth/logout?client_id=client-1&amp;post_logout_redirect_uri='.urlencode(route('login')), false);
+});
+
 test('protected pages send guests to the login', function () {
     $this->get('/dashboard')->assertRedirect(route('login'));
 });
