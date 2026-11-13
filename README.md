@@ -1,12 +1,12 @@
 # Todo App mit Laravel & Flutter
 
-Diese Anwendung ist eine umfassende Todo-App mit einem Laravel-Backend (Jetstream, Livewire, Tailwind CSS) und einer mobilen Flutter-App.
+Diese Anwendung ist eine umfassende Todo-App mit einem Laravel-Backend (Livewire, Tailwind CSS) und einer mobilen Flutter-App.
 
 ## Features
 
 - **Web-Interface**: Erstellt mit Laravel Livewire und Tailwind CSS.
 - **Mobile-App**: Flutter-Anwendung für iOS und Android.
-- **Authentifizierung**: Jetstream (Web) und Sanctum API (Mobile).
+- **Authentifizierung**: Single Sign-on über AccountSphere (Web) und Sanctum-Tokens (API/Mobile), siehe [Anmeldung](#anmeldung-über-accountsphere).
 - **Aufgabenverwaltung**:
   - Einmalige Aufgaben.
   - Wiederkehrende Aufgaben (Stündlich, Täglich, Wöchentlich, Monatlich).
@@ -19,7 +19,7 @@ Der Fokus liegt derzeit auf dem **Laravel-Backend** und dem **Web-Interface**. D
 
 ## Tech Stack
 
-- **Backend**: Laravel 12, Jetstream, Sanctum.
+- **Backend**: Laravel 12, Sanctum, `code-sphere/oauth`.
 - **Frontend Web**: Livewire 3, Tailwind CSS.
 - **Mobile**: Flutter 3.
 - **Datenbank**: MySQL/PostgreSQL (Standard Laravel).
@@ -74,14 +74,31 @@ Dieser Befehl sendet eine einfache Test-Push-Nachricht an alle registrierten Ger
 - **Tasks**: Speichert die Aufgabendetails und die Wiederholungsregeln (`recurrence_rule`).
 - **Task Completions**: Protokolliert die Erledigungen und Überspringen von Terminen.
 
+## Anmeldung über AccountSphere
+
+Konten gehören AccountSphere (CodeSphere Accounts). Die Weboberfläche meldet über OAuth2 an (Paket `code-sphere/oauth`, Routen `/login`, `/auth/redirect`, `/auth/callback`, `/auth/logout`). Lokal bleiben nur `codesphere_id`, die OAuth-Tokens und ein **Snapshot** von Name, E-Mail und Sprache, den jeder Login überschreibt – Haushalte, Zuweisungen und API zeigen auch Nutzer an, die gerade keine Session haben.
+
+Einrichtung:
+
+1. In AccountSphere (Entwicklermodus) einen OAuth-Client anlegen, Redirect-URI `https://<host>/auth/callback`.
+2. `CODESPHERE_*` in `.env` setzen (siehe `.env.example`; App-Key ist `tasksphere`).
+3. `php artisan migrate`
+4. Bestandskonten koppeln: `php artisan users:link-codesphere <lokale ID oder E-Mail> <AccountSphere-ID>`. Ohne Kopplung landet der erste SSO-Login in einem neuen, leeren Konto; ein solcher leerer Stub wird beim späteren Koppeln automatisch entfernt.
+
+Hintergrund und Entscheidungen: `docs/superpowers/specs/2026-11-13-accountsphere-sso-design.md`.
+
 ## API Dokumentation
 
 Die API nutzt Laravel Sanctum für die Authentifizierung. Alle Requests müssen den Header `Accept: application/json` enthalten.
 
 ### Authentifizierung
 
-- `POST /api/login`: Login mit `email`, `password` und `device_name`. Gibt ein `token` zurück.
+- `POST /api/login`: Login mit `email`, `password` und `device_name`. Die Zugangsdaten werden gegen AccountSphere geprüft; zurück kommt wie bisher ein Sanctum-`token` samt `user`. Antwortet `429`, wenn AccountSphere drosselt (5 Logins/Minute je IP – alle Logins teilen sich die IP des TasksSphere-Servers), und `503`, wenn AccountSphere nicht erreichbar ist.
+- `POST /api/register`, `POST /api/forgot-password`: `410 Gone` mit `url` zu AccountSphere.
+- `PUT /api/profile`: ändert nur noch `language`. Unveränderte `first_name`/`last_name`/`email` werden akzeptiert, Änderungen daran oder ein `password` mit `422` abgelehnt.
 - `POST /api/logout`: Logout (erfordert Bearer Token).
+
+Alternativ lassen sich Tokens in der Weboberfläche unter **API-Tokens** (`/user/api-tokens`) anlegen. Der Token-Name steuert weiterhin die Herkunft neuer Aufgaben (z. B. `gehirn-agent`).
 
 ### Aufgaben (Tasks)
 

@@ -2,26 +2,29 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use CodeSphere\OAuth\Concerns\HasCodeSphereIdentity;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * Lokaler Stub eines AccountSphere-Kontos.
+ *
+ * first_name, last_name, email und language sind ein Snapshot, den jeder
+ * Login aus AccountSphere ueberschreibt (SyncProfileAfterCodeSphereLogin).
+ */
 class User extends Authenticatable
 {
     use HasApiTokens;
+    use HasCodeSphereIdentity;
 
     /** @use HasFactory<UserFactory> */
     use HasFactory;
 
-    use HasProfilePhoto;
     use Notifiable;
-    use TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -29,10 +32,13 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'codesphere_id',
+        'access_token',
+        'refresh_token',
+        'token_expires_at',
         'first_name',
         'last_name',
         'email',
-        'password',
         'language',
         'timezone',
         'fcm_token',
@@ -46,10 +52,8 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
-        'two_factor_recovery_codes',
-        'two_factor_secret',
+        'access_token',
+        'refresh_token',
     ];
 
     /**
@@ -63,13 +67,35 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the user's full name.
+     * Ueberschreibt HasCodeSphereIdentity: Der Trait liest aus der Session und
+     * lieferte damit fuer jeden Nutzer den Namen des gerade eingeloggten.
      */
-    protected function name(): Attribute
+    public function getNameAttribute(): string
     {
-        return Attribute::make(
-            get: fn () => trim($this->first_name.' '.$this->last_name),
-        );
+        return trim($this->first_name.' '.$this->last_name);
+    }
+
+    /**
+     * Siehe getNameAttribute().
+     */
+    public function getEmailAttribute(?string $value): ?string
+    {
+        return $value;
+    }
+
+    /**
+     * Initialen-Avatar, wie ihn Jetstream ohne hochgeladenes Profilfoto lieferte.
+     */
+    protected function profilePhotoUrl(): Attribute
+    {
+        return Attribute::get(function (): string {
+            $initials = collect(explode(' ', $this->name))
+                ->filter()
+                ->map(fn (string $segment) => mb_substr($segment, 0, 1))
+                ->join(' ');
+
+            return 'https://ui-avatars.com/api/?name='.urlencode($initials).'&color=7F9CF5&background=EBF4FF';
+        });
     }
 
     /**
@@ -80,11 +106,38 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'access_token' => 'encrypted',
+            'refresh_token' => 'encrypted',
+            'token_expires_at' => 'datetime',
             'notify_email' => 'boolean',
             'notify_push' => 'boolean',
         ];
+    }
+
+    /**
+     * Uebernimmt Name, E-Mail und Sprache aus dem AccountSphere-Profil.
+     *
+     * AccountSphere kennt nur einen Gesamtnamen; geteilt wird am ersten
+     * Leerzeichen, wie schon beim Aufteilen der alten name-Spalte.
+     *
+     * @param  array<string, mixed>  $profile  der user-Teil der AccountSphere-Antwort
+     */
+    public function syncFromCodeSphere(array $profile): void
+    {
+        $attributes = array_filter([
+            'email' => $profile['email'] ?? null,
+            'language' => $profile['language'] ?? null,
+        ], fn ($value) => $value !== null);
+
+        $name = trim((string) ($profile['name'] ?? ''));
+
+        if ($name !== '') {
+            $parts = explode(' ', $name, 2);
+            $attributes['first_name'] = $parts[0];
+            $attributes['last_name'] = $parts[1] ?? null;
+        }
+
+        $this->forceFill($attributes)->save();
     }
 
     public function households()

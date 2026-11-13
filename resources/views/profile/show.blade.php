@@ -7,45 +7,47 @@
 
     <div>
         <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
-            @if (Laravel\Fortify\Features::canUpdateProfileInformation())
-                @livewire('profile.update-profile-information-form')
+            <x-action-section>
+                <x-slot name="title">
+                    {{ __('Profile Information') }}
+                </x-slot>
 
-                <x-section-border />
+                <x-slot name="description">
+                    Name, E-Mail, Passwort und Sprache verwaltest du zentral in deinem CodeSphere-Konto.
+                </x-slot>
 
-                <div class="mt-10 sm:mt-0">
-                    <livewire:profile.update-notification-preferences-form />
-                </div>
+                <x-slot name="content">
+                    <dl class="space-y-4 text-sm">
+                        <div>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('Name') }}</dt>
+                            <dd class="mt-1 text-gray-900 dark:text-gray-100">{{ Auth::user()->name }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('Email') }}</dt>
+                            <dd class="mt-1 text-gray-900 dark:text-gray-100">{{ Auth::user()->email }}</dd>
+                        </div>
+                    </dl>
 
-                <x-section-border />
-            @endif
+                    <div class="mt-6">
+                        <a href="{{ rtrim(config('codesphere.url'), '/') }}/profile"
+                           class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
+                            In CodeSphere bearbeiten
+                        </a>
+                    </div>
+                </x-slot>
+            </x-action-section>
 
-            @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
-                <div class="mt-10 sm:mt-0">
-                    @livewire('profile.update-password-form')
-                </div>
-
-                <x-section-border />
-            @endif
-
-            @if (Laravel\Fortify\Features::canManageTwoFactorAuthentication())
-                <div class="mt-10 sm:mt-0">
-                    @livewire('profile.two-factor-authentication-form')
-                </div>
-
-                <x-section-border />
-            @endif
+            <x-section-border />
 
             <div class="mt-10 sm:mt-0">
-                @livewire('profile.logout-other-browser-sessions-form')
+                <livewire:profile.update-notification-preferences-form />
             </div>
 
-            @if (Laravel\Jetstream\Jetstream::hasAccountDeletionFeatures())
-                <x-section-border />
+            <x-section-border />
 
-                <div class="mt-10 sm:mt-0">
-                    @livewire('profile.delete-user-form')
-                </div>
-            @endif
+            <div class="mt-10 sm:mt-0">
+                <livewire:delete-account-form />
+            </div>
         </div>
     </div>
 </x-app-layout>

@@ -22,11 +22,7 @@ Route::post('/kontakt', [ContactController::class, 'send'])
     ->middleware('throttle:5,10')
     ->name('contact.send');
 
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -37,4 +33,8 @@ Route::middleware([
 
     Route::get('/lists', ListManager::class)->name('lists.index');
     Route::get('/lists/{taskList}', ListDetail::class)->name('lists.show');
+
+    // Gleiche Pfade wie unter Jetstream, damit Lesezeichen weiter funktionieren.
+    Route::view('/user/profile', 'profile.show')->name('profile.show');
+    Route::view('/user/api-tokens', 'api.index')->name('api-tokens.index');
 });

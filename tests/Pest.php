@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 /*
@@ -39,3 +40,21 @@ uses(TestCase::class)->in('Feature', 'Unit');
 | of lines of code in your test files.
 |
 */
+
+/**
+ * Laesst POST /api/auth/login von AccountSphere mit diesem Konto antworten.
+ *
+ * @param  array<string, mixed>  $user  der user-Teil der AccountSphere-Antwort
+ */
+function fakeAccountSphereLogin(array $user, int $status = 200): void
+{
+    Http::fake([
+        '*/api/auth/login' => Http::response(
+            $status === 200
+                ? ['user' => $user, 'groups' => [], 'access_token' => 'as-token', 'token_type' => 'Bearer']
+                : ['message' => 'Invalid credentials.'],
+            $status,
+        ),
+        '*/api/auth/logout' => Http::response(null, 204),
+    ]);
+}

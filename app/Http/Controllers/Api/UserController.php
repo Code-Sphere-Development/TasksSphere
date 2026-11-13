@@ -4,11 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
+    /**
+     * Felder, die AccountSphere besitzt. Clients wie die Mobile-App schicken sie
+     * beim Speichern des Profils weiterhin mit; unveraendert sind sie harmlos.
+     */
+    private const MANAGED_BY_ACCOUNTSPHERE = ['first_name', 'last_name', 'email'];
+
     public function show(Request $request)
     {
         return $request->user();
@@ -19,20 +24,33 @@ class UserController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'first_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'last_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'email' => ['sometimes', 'nullable', 'string', 'email', 'max:255'],
+            'password' => ['nullable', 'string'],
             'language' => ['nullable', 'string', 'in:de,en'],
         ]);
 
+        $changed = collect(self::MANAGED_BY_ACCOUNTSPHERE)
+            ->filter(fn (string $field) => array_key_exists($field, $validated)
+                && (string) $validated[$field] !== (string) $user->getAttribute($field));
+
         if (! empty($validated['password'])) {
-            $validated['password'] = Hash::make($validated['password']);
-        } else {
-            unset($validated['password']);
+            $changed->push('password');
         }
 
-        $user->update($validated);
+        if ($changed->isNotEmpty()) {
+            $message = 'Name, E-Mail und Passwort werden in CodeSphere geändert: '
+                .rtrim((string) config('codesphere.url'), '/').'/profile';
+
+            throw ValidationException::withMessages(
+                $changed->mapWithKeys(fn (string $field) => [$field => [$message]])->all()
+            );
+        }
+
+        if (array_key_exists('language', $validated) && $validated['language'] !== null) {
+            $user->update(['language' => $validated['language']]);
+        }
 
         return response()->json([
             'message' => 'Profil aktualisiert',

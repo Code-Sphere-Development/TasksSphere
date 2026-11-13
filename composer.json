@@ -7,10 +7,10 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "code-sphere/oauth": "@dev",
         "kreait/laravel-firebase": "^7.2",
         "laravel-notification-channels/fcm": "^6.0",
         "laravel/framework": "^13.39",
-        "laravel/jetstream": "^5.4",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0.2",
         "livewire/livewire": "^4.4.6",

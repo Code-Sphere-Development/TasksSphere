@@ -2,20 +2,19 @@
 
 use App\Models\User;
 use App\Models\UserDevice;
-use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Http;
 use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
 
 /*
 |--------------------------------------------------------------------------
-| register
+| register / forgotPassword
 |--------------------------------------------------------------------------
 */
 
-test('register creates a user and returns a token', function () {
+test('register points to AccountSphere instead of creating an account', function () {
     $response = $this->postJson('/api/register', [
         'first_name' => 'Jane',
         'last_name' => 'Doe',
@@ -25,69 +24,16 @@ test('register creates a user and returns a token', function () {
         'device_name' => 'mobile-app',
     ]);
 
-    $response->assertStatus(200)
-        ->assertJsonStructure([
-            'token',
-            'user' => ['id', 'first_name', 'last_name', 'email'],
-        ]);
+    $response->assertStatus(410)
+        ->assertJson(['url' => 'https://account.code-sphere.de/register']);
 
-    expect($response->json('token'))->not->toBeEmpty();
-
-    $this->assertDatabaseHas('users', [
-        'email' => 'jane@example.com',
-        'first_name' => 'Jane',
-        'last_name' => 'Doe',
-    ]);
-
-    // Sanctum token persisted for the new user.
-    $user = User::where('email', 'jane@example.com')->first();
-    $this->assertDatabaseHas('personal_access_tokens', [
-        'tokenable_id' => $user->id,
-        'name' => 'mobile-app',
-    ]);
+    $this->assertDatabaseCount('users', 0);
 });
 
-test('register requires all mandatory fields', function () {
-    $response = $this->postJson('/api/register', []);
-
-    $response->assertStatus(422)
-        ->assertJsonValidationErrors([
-            'first_name',
-            'last_name',
-            'email',
-            'password',
-            'device_name',
-        ]);
-});
-
-test('register rejects a duplicate email', function () {
-    User::factory()->create(['email' => 'taken@example.com']);
-
-    $response = $this->postJson('/api/register', [
-        'first_name' => 'Jane',
-        'last_name' => 'Doe',
-        'email' => 'taken@example.com',
-        'password' => 'password123',
-        'password_confirmation' => 'password123',
-        'device_name' => 'mobile-app',
-    ]);
-
-    $response->assertStatus(422)
-        ->assertJsonValidationErrors(['email']);
-});
-
-test('register requires the password to be confirmed', function () {
-    $response = $this->postJson('/api/register', [
-        'first_name' => 'Jane',
-        'last_name' => 'Doe',
-        'email' => 'jane@example.com',
-        'password' => 'password123',
-        'password_confirmation' => 'different456',
-        'device_name' => 'mobile-app',
-    ]);
-
-    $response->assertStatus(422)
-        ->assertJsonValidationErrors(['password']);
+test('forgot password points to AccountSphere', function () {
+    $this->postJson('/api/forgot-password', ['email' => 'jane@example.com'])
+        ->assertStatus(410)
+        ->assertJson(['url' => 'https://account.code-sphere.de/forgot-password']);
 });
 
 /*
@@ -96,47 +42,130 @@ test('register requires the password to be confirmed', function () {
 |--------------------------------------------------------------------------
 */
 
-test('login rejects invalid credentials', function () {
-    $user = User::factory()->create([
-        'password' => bcrypt('secret123'),
-    ]);
+test('login checks the credentials against AccountSphere and returns a token', function () {
+    fakeAccountSphereLogin(['id' => 42, 'name' => 'Jane Doe', 'email' => 'jane@example.com', 'language' => 'en']);
 
     $response = $this->postJson('/api/login', [
-        'email' => $user->email,
+        'email' => 'jane@example.com',
+        'password' => 'secret123',
+        'device_name' => 'mobile-app',
+    ]);
+
+    $response->assertStatus(200)
+        ->assertJsonStructure([
+            'token',
+            'user' => ['id', 'first_name', 'last_name', 'email', 'name', 'profile_photo_url'],
+        ])
+        ->assertJsonPath('user.first_name', 'Jane')
+        ->assertJsonPath('user.last_name', 'Doe')
+        ->assertJsonPath('user.email', 'jane@example.com')
+        ->assertJsonMissingPath('user.access_token');
+
+    $user = User::where('codesphere_id', 42)->sole();
+    expect($user->language)->toBe('en');
+
+    $this->assertDatabaseHas('personal_access_tokens', [
+        'tokenable_id' => $user->id,
+        'name' => 'mobile-app',
+    ]);
+
+    Http::assertSent(fn ($request) => str_ends_with($request->url(), '/api/auth/login')
+        && $request['email'] === 'jane@example.com'
+        && $request['password'] === 'secret123');
+});
+
+test('login revokes the AccountSphere token it does not need', function () {
+    fakeAccountSphereLogin(['id' => 42, 'name' => 'Jane Doe', 'email' => 'jane@example.com']);
+
+    $this->postJson('/api/login', [
+        'email' => 'jane@example.com',
+        'password' => 'secret123',
+        'device_name' => 'mobile-app',
+    ])->assertStatus(200);
+
+    Http::assertSent(fn ($request) => str_ends_with($request->url(), '/api/auth/logout')
+        && $request->hasHeader('Authorization', 'Bearer as-token'));
+});
+
+test('login lands in a linked existing account', function () {
+    $user = User::factory()->create(['codesphere_id' => 42, 'first_name' => 'Alt']);
+    fakeAccountSphereLogin(['id' => 42, 'name' => 'Jane Doe', 'email' => 'jane@example.com']);
+
+    $response = $this->postJson('/api/login', [
+        'email' => 'jane@example.com',
+        'password' => 'secret123',
+        'device_name' => 'gehirn-agent',
+    ]);
+
+    $response->assertStatus(200)->assertJsonPath('user.id', $user->id);
+    expect($user->fresh()->first_name)->toBe('Jane');
+    $this->assertDatabaseCount('users', 1);
+});
+
+test('login rejects invalid credentials', function () {
+    fakeAccountSphereLogin([], 401);
+
+    $response = $this->postJson('/api/login', [
+        'email' => 'jane@example.com',
         'password' => 'wrong-password',
         'device_name' => 'mobile-app',
     ]);
 
     $response->assertStatus(422)
         ->assertJsonValidationErrors(['email']);
+
+    $this->assertDatabaseCount('users', 0);
 });
 
-test('login rejects an unknown email', function () {
-    $response = $this->postJson('/api/login', [
-        'email' => 'nobody@example.com',
+test('login rejects an account deactivated in AccountSphere', function () {
+    fakeAccountSphereLogin([], 403);
+
+    $this->postJson('/api/login', [
+        'email' => 'jane@example.com',
         'password' => 'secret123',
         'device_name' => 'mobile-app',
-    ]);
+    ])->assertStatus(422)->assertJsonValidationErrors(['email']);
+});
 
-    $response->assertStatus(422)
-        ->assertJsonValidationErrors(['email']);
+test('login passes AccountSphere throttling through', function () {
+    fakeAccountSphereLogin([], 429);
+
+    $this->postJson('/api/login', [
+        'email' => 'jane@example.com',
+        'password' => 'secret123',
+        'device_name' => 'mobile-app',
+    ])->assertStatus(429);
+});
+
+test('login answers 503 when AccountSphere is down', function () {
+    Http::fake(['*/api/auth/login' => Http::response('Bad Gateway', 502)]);
+
+    $this->postJson('/api/login', [
+        'email' => 'jane@example.com',
+        'password' => 'secret123',
+        'device_name' => 'mobile-app',
+    ])->assertStatus(503);
+
+    $this->assertDatabaseCount('users', 0);
 });
 
 test('login requires email, password and device name', function () {
+    Http::fake();
+
     $response = $this->postJson('/api/login', []);
 
     $response->assertStatus(422)
         ->assertJsonValidationErrors(['email', 'password', 'device_name']);
+
+    Http::assertNothingSent();
 });
 
 test('login updates the timezone from the header', function () {
-    $user = User::factory()->create([
-        'password' => bcrypt('secret123'),
-        'timezone' => 'UTC',
-    ]);
+    $user = User::factory()->create(['codesphere_id' => 42, 'timezone' => 'UTC']);
+    fakeAccountSphereLogin(['id' => 42, 'name' => 'Jane Doe', 'email' => 'jane@example.com']);
 
     $response = $this->postJson('/api/login', [
-        'email' => $user->email,
+        'email' => 'jane@example.com',
         'password' => 'secret123',
         'device_name' => 'mobile-app',
     ], [
@@ -146,49 +175,6 @@ test('login updates the timezone from the header', function () {
     $response->assertStatus(200);
 
     expect($user->fresh()->timezone)->toBe('Europe/Berlin');
-});
-
-/*
-|--------------------------------------------------------------------------
-| forgotPassword
-|--------------------------------------------------------------------------
-*/
-
-test('forgot password sends a reset link for an existing user', function () {
-    Notification::fake();
-
-    $user = User::factory()->create();
-
-    $response = $this->postJson('/api/forgot-password', [
-        'email' => $user->email,
-    ]);
-
-    $response->assertStatus(200)
-        ->assertJsonStructure(['message']);
-
-    Notification::assertSentTo($user, ResetPassword::class);
-});
-
-test('forgot password fails for an unknown email', function () {
-    Notification::fake();
-
-    $response = $this->postJson('/api/forgot-password', [
-        'email' => 'nobody@example.com',
-    ]);
-
-    $response->assertStatus(422)
-        ->assertJsonValidationErrors(['email']);
-
-    Notification::assertNothingSent();
-});
-
-test('forgot password requires a valid email', function () {
-    $response = $this->postJson('/api/forgot-password', [
-        'email' => 'not-an-email',
-    ]);
-
-    $response->assertStatus(422)
-        ->assertJsonValidationErrors(['email']);
 });
 
 /*
