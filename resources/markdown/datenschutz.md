@@ -21,9 +21,9 @@ Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren 
 
 ## 3. Konto und Anmeldung
 
-Zur Nutzung ist ein Konto erforderlich. Gespeichert werden Vor- und Nachname, E-Mail-Adresse, ein Passwort-Hash, die gewählte Sprache und Zeitzone sowie, falls eingerichtet, die Geheimnisse der Zwei-Faktor-Authentifizierung.
+Zur Nutzung ist ein CodeSphere-Konto erforderlich. Die Anmeldung erfolgt über den zentralen Anmeldedienst **CodeSphere Accounts**; Passwörter werden dort und nicht in dieser Anwendung verarbeitet. Nach der Anmeldung übernimmt diese Anwendung die Kennung deines CodeSphere-Kontos, Vor- und Nachname, E-Mail-Adresse und Sprache sowie die für die Anmeldung nötigen Zugangsschlüssel. Zusätzlich gespeichert werden die gewählte Zeitzone und deine Benachrichtigungseinstellungen.
 
-Die Anmeldung setzt ein Sitzungs-Cookie, das für die Nutzung technisch erforderlich ist. Ein Cookie zur dauerhaften Anmeldung wird nur gesetzt, wenn du „Angemeldet bleiben" wählst. Es werden keine Cookies zu Analyse- oder Werbezwecken eingesetzt.
+Die Anmeldung setzt ein Sitzungs-Cookie sowie ein Cookie zur dauerhaften Anmeldung, die für die Nutzung technisch erforderlich sind. Es werden keine Cookies zu Analyse- oder Werbezwecken eingesetzt.
 
 Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Erfüllung des Nutzungsverhältnisses).
 
@@ -37,7 +37,7 @@ Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.
 
 ## 5. Zugangsschlüssel für die Schnittstelle
 
-Du kannst Zugangsschlüssel (API-Token) erzeugen, um andere Anwendungen — etwa die mobile App oder eine Home-Assistant-Integration — anzubinden. Gespeichert wird ein Hash des Schlüssels sowie Name, Berechtigungen und Zeitpunkt der letzten Nutzung. Du kannst jeden Schlüssel jederzeit widerrufen.
+Du kannst Zugangsschlüssel (API-Token) erzeugen, um andere Anwendungen — etwa die mobile App oder eine Home-Assistant-Integration — anzubinden. Gespeichert wird ein Hash des Schlüssels sowie Name, Berechtigungen und Zeitpunkt der letzten Nutzung. Meldet sich die mobile App mit E-Mail und Passwort an, werden diese zur Prüfung an CodeSphere Accounts weitergeleitet und nicht gespeichert. Du kannst jeden Schlüssel jederzeit widerrufen.
 
 Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.
 
@@ -77,7 +77,7 @@ Für die mobile App gilt diese Erklärung entsprechend. Zusätzlich wird bei der
 
 Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21). Eine erteilte Einwilligung kannst du jederzeit mit Wirkung für die Zukunft widerrufen.
 
-Dein Konto und alle zugehörigen Daten kannst du in den Profileinstellungen selbst löschen.
+Dein Konto in dieser Anwendung und alle zugehörigen Daten kannst du in den Profileinstellungen selbst löschen. Dein CodeSphere-Konto verwaltest und löschst du in CodeSphere Accounts.
 
 Du hast außerdem das Recht, dich bei einer Datenschutzaufsichtsbehörde zu beschweren. Zuständig ist die Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen, Kavalleriestraße 2–4, 40213 Düsseldorf, [www.ldi.nrw.de](https://www.ldi.nrw.de).
 

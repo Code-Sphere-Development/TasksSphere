@@ -22,11 +22,9 @@
                                 Anmelden
                             </a>
 
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="text-lg font-semibold leading-6 text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition">
-                                    Registrieren <span aria-hidden="true">→</span>
-                                </a>
-                            @endif
+                            <a href="{{ rtrim(config('codesphere.url'), '/') }}/register" class="text-lg font-semibold leading-6 text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                                Registrieren <span aria-hidden="true">→</span>
+                            </a>
                         @endauth
                     @endif
                 </div>

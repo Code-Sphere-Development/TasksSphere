@@ -6,9 +6,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 test('api login saves fcm token from headers', function () {
-    $user = User::factory()->create([
-        'password' => bcrypt($password = 'secret123'),
-    ]);
+    $user = User::factory()->create(['codesphere_id' => 42]);
+    fakeAccountSphereLogin(['id' => 42, 'name' => $user->name, 'email' => $user->email]);
+    $password = 'secret123';
 
     $response = $this->postJson('/api/login', [
         'email' => $user->email,
@@ -31,9 +31,9 @@ test('api login saves fcm token from headers', function () {
 });
 
 test('api login saves fcm token from body', function () {
-    $user = User::factory()->create([
-        'password' => bcrypt($password = 'secret123'),
-    ]);
+    $user = User::factory()->create(['codesphere_id' => 42]);
+    fakeAccountSphereLogin(['id' => 42, 'name' => $user->name, 'email' => $user->email]);
+    $password = 'secret123';
 
     $response = $this->postJson('/api/login', [
         'email' => $user->email,

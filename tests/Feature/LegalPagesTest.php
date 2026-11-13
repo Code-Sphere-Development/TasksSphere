@@ -26,8 +26,8 @@ test('markdown is rendered, not shown raw', function () {
         ->assertDontSee('# Impressum');
 });
 
-test('the login page links to both pages', function () {
-    $this->get('/login')
+test('the start page links to both pages', function () {
+    $this->get('/')
         ->assertSee(route('legal.imprint'))
         ->assertSee(route('legal.privacy'));
 });

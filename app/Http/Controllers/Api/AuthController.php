@@ -4,55 +4,30 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\AccountSphere\PasswordLogin;
+use App\Support\AccountSphere\PasswordLoginFailed;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    /**
+     * Konten entstehen nur noch in AccountSphere.
+     */
+    public function register()
     {
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'device_name' => 'required',
-        ]);
-
-        $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        return response()->json([
-            'token' => $user->createToken($request->device_name)->plainTextToken,
-            'user' => $user,
-        ]);
+        return $this->managedByAccountSphere('/register');
     }
 
-    public function forgotPassword(Request $request)
+    /**
+     * Passwoerter verwaltet AccountSphere.
+     */
+    public function forgotPassword()
     {
-        $request->validate(['email' => 'required|email']);
-
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
-
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json(['message' => __($status)]);
-        }
-
-        throw ValidationException::withMessages([
-            'email' => [__($status)],
-        ]);
+        return $this->managedByAccountSphere('/forgot-password');
     }
 
-    public function login(Request $request)
+    public function login(Request $request, PasswordLogin $passwordLogin)
     {
         $request->validate([
             'email' => 'required|email',
@@ -60,13 +35,18 @@ class AuthController extends Controller
             'device_name' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        try {
+            $profile = $passwordLogin->attempt($request->email, $request->password);
+        } catch (PasswordLoginFailed $e) {
+            if ($e->status === 422) {
+                throw ValidationException::withMessages(['email' => [$e->getMessage()]]);
+            }
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['Die Anmeldedaten sind falsch.'],
-            ]);
+            return response()->json(['message' => $e->getMessage()], $e->status);
         }
+
+        $user = User::firstOrCreate(['codesphere_id' => $profile['id']]);
+        $user->syncFromCodeSphere($profile);
 
         // Falls FCM Token im Header oder Body mitgesendet wird, auch beim Login speichern
         $fcmToken = $request->header('X-FCM-Token') ?? $request->fcm_token;
@@ -85,6 +65,16 @@ class AuthController extends Controller
             'token' => $user->createToken($request->device_name)->plainTextToken,
             'user' => $user,
         ]);
+    }
+
+    private function managedByAccountSphere(string $path)
+    {
+        $url = rtrim((string) config('codesphere.url'), '/').$path;
+
+        return response()->json([
+            'message' => 'Konten werden in CodeSphere verwaltet.',
+            'url' => $url,
+        ], 410);
     }
 
     public function logout(Request $request)

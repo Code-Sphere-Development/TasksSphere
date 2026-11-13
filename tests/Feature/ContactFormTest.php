@@ -82,6 +82,6 @@ test('too many messages in a row are throttled', function () {
 });
 
 test('the footer and the imprint link to the contact page', function () {
-    $this->get('/login')->assertSee(route('contact.show'));
+    $this->get('/')->assertSee(route('contact.show'));
     $this->get('/impressum')->assertSee(route('contact.show'));
 });
