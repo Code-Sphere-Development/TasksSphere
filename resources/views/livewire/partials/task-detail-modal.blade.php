@@ -28,6 +28,11 @@
                 @endif
 
                 <dl class="mt-6 space-y-3 text-sm">
+                    <div class="flex justify-between gap-4">
+                        <dt class="font-semibold text-gray-500 dark:text-gray-400 flex-shrink-0">{{ __('ID') }}</dt>
+                        <dd class="text-right tabular-nums text-gray-900 dark:text-white">#{{ $detailTask->id }}</dd>
+                    </div>
+
                     @if($detailPlannedAt)
                         <div class="flex justify-between gap-4">
                             <dt class="font-semibold text-gray-500 dark:text-gray-400 flex-shrink-0">{{ __('Dieser Termin') }}</dt>

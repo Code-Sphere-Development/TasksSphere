@@ -116,6 +116,7 @@
                             <div class="group flex items-center px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-all">
                                 <div class="flex-grow min-w-0">
                                     <div class="flex items-center space-x-2">
+                                        <x-task-id :id="$task->id" class="text-xs flex-shrink-0" />
                                         <h3 class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ $task->title }}</h3>
                                         @if($task->isRecurring())
                                             <span class="text-purple-500 dark:text-purple-400 flex-shrink-0" title="{{ __('Wiederkehrend') }}">&#8635;</span>
@@ -157,6 +158,7 @@
                             <div class="divide-y divide-gray-100 dark:divide-gray-700">
                                 @foreach($availableTasks as $task)
                                     <button wire:click="assignTask({{ $task->id }})" class="w-full text-left px-5 py-3 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors">
+                                        <x-task-id :id="$task->id" class="mr-1.5 text-xs" />
                                         <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $task->title }}</span>
                                         @if($task->due_at)
                                             <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">{{ $task->due_at->translatedFormat('d.m.Y') }}</span>
