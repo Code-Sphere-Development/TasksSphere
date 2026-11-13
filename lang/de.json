@@ -150,5 +150,10 @@
     "Website": "Website",
     "Deine Angaben werden nur zur Beantwortung deiner Anfrage verwendet.": "Deine Angaben werden nur zur Beantwortung deiner Anfrage verwendet.",
     "Nachricht senden": "Nachricht senden",
-    "Deine Nachricht ist angekommen. Wir melden uns per E-Mail.": "Deine Nachricht ist angekommen. Wir melden uns per E-Mail."
+    "Deine Nachricht ist angekommen. Wir melden uns per E-Mail.": "Deine Nachricht ist angekommen. Wir melden uns per E-Mail.",
+    "Invalid OAuth state.": "Die Anmeldung ist abgelaufen oder wurde in einem anderen Tab gestartet. Bitte erneut versuchen.",
+    "Authentication failed.": "Die Anmeldung ist fehlgeschlagen.",
+    "Authentication failed. Please try again.": "Die Anmeldung ist fehlgeschlagen. Bitte erneut versuchen.",
+    "Could not fetch user profile.": "Dein Profil konnte nicht von CodeSphere geladen werden.",
+    "Your account type is not allowed for this application.": "Mit diesem Kontotyp kannst du TasksSphere nicht nutzen. Melde dich mit einem anderen CodeSphere-Konto an."
 }
