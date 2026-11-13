@@ -4,7 +4,6 @@ use App\Livewire\TaskManager;
 use App\Models\Task;
 use App\Models\TaskCompletion;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
@@ -249,8 +248,11 @@ test('editTask cannot load another users task', function () {
     $task = Task::factory()->create(['user_id' => $owner->id]);
     $this->actingAs($other);
 
-    expect(fn () => Livewire::test(TaskManager::class)->call('editTask', $task->id))
-        ->toThrow(ModelNotFoundException::class);
+    // Livewire renders the ModelNotFoundException as a 404 response in tests.
+    Livewire::test(TaskManager::class)
+        ->call('editTask', $task->id)
+        ->assertNotFound()
+        ->assertSet('isEditing', false);
 });
 
 /*

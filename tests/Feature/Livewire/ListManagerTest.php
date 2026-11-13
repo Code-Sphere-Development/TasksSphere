@@ -3,7 +3,6 @@
 use App\Livewire\ListManager;
 use App\Models\TaskList;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
@@ -226,12 +225,16 @@ test('editList coalesces null icon and color to empty strings', function () {
         ->assertSet('color', '');
 });
 
-test('editList throws when the list does not exist', function () {
+test('editList returns not found when the list does not exist', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    expect(fn () => Livewire::test(ListManager::class)->call('editList', 999999))
-        ->toThrow(ModelNotFoundException::class);
+    // Livewire renders the ModelNotFoundException as a 404 response in tests.
+    Livewire::test(ListManager::class)
+        ->call('editList', 999999)
+        ->assertNotFound()
+        ->assertSet('editingListId', null)
+        ->assertSet('isEditing', false);
 });
 
 test('editList is denied for another users list', function () {
@@ -385,12 +388,13 @@ test('deleteList soft deletes the users own list', function () {
     $this->assertSoftDeleted('task_lists', ['id' => $list->id]);
 });
 
-test('deleteList throws when the list does not exist', function () {
+test('deleteList returns not found when the list does not exist', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    expect(fn () => Livewire::test(ListManager::class)->call('deleteList', 999999))
-        ->toThrow(ModelNotFoundException::class);
+    Livewire::test(ListManager::class)
+        ->call('deleteList', 999999)
+        ->assertNotFound();
 });
 
 test('deleteList is denied for another users list', function () {
