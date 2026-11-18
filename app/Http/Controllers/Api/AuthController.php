@@ -32,7 +32,10 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
-            'device_name' => 'required',
+            // Optional, weil das Pflichtfeld beim Anbinden des Gehirn-Agenten
+            // nirgends erkennbar war. Der Name steuert weiterhin die Herkunft
+            // (config/tasks.php sources_by_token_name).
+            'device_name' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -62,7 +65,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'token' => $user->createToken($request->device_name)->plainTextToken,
+            'token' => $user->createToken($request->input('device_name') ?: 'api')->plainTextToken,
             'user' => $user,
         ]);
     }
