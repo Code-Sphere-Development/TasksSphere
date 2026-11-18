@@ -149,13 +149,13 @@ test('login answers 503 when AccountSphere is down', function () {
     $this->assertDatabaseCount('users', 0);
 });
 
-test('login requires email, password and device name', function () {
+test('login requires email and password', function () {
     Http::fake();
 
     $response = $this->postJson('/api/login', []);
 
     $response->assertStatus(422)
-        ->assertJsonValidationErrors(['email', 'password', 'device_name']);
+        ->assertJsonValidationErrors(['email', 'password']);
 
     Http::assertNothingSent();
 });
@@ -305,4 +305,15 @@ test('update fcm token reassigns a token from another user', function () {
         'fcm_token' => 'shared-token',
         'device_id' => 'new-device',
     ]);
+});
+
+test('login without device name issues a token named api', function () {
+    fakeAccountSphereLogin(['id' => 42, 'name' => 'Jane Doe', 'email' => 'jane@example.com', 'language' => 'de']);
+
+    $this->postJson('/api/login', [
+        'email' => 'jane@example.com',
+        'password' => 'secret123',
+    ])->assertOk()->assertJsonStructure(['token']);
+
+    expect(User::firstWhere('codesphere_id', 42)->tokens()->pluck('name')->all())->toBe(['api']);
 });

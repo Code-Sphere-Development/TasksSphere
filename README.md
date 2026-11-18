@@ -93,7 +93,7 @@ Die API nutzt Laravel Sanctum für die Authentifizierung. Alle Requests müssen 
 
 ### Authentifizierung
 
-- `POST /api/login`: Login mit `email`, `password` und `device_name`. Die Zugangsdaten werden gegen AccountSphere geprüft; zurück kommt wie bisher ein Sanctum-`token` samt `user`. Antwortet `429`, wenn AccountSphere drosselt (5 Logins/Minute je IP – alle Logins teilen sich die IP des TasksSphere-Servers), und `503`, wenn AccountSphere nicht erreichbar ist.
+- `POST /api/login`: Login mit `email` und `password`; optional `device_name` als Name des Tokens (Standard `api`, `gehirn-agent` kennzeichnet Aufgaben als vom Agenten angelegt). Die Zugangsdaten werden gegen AccountSphere geprüft; zurück kommt wie bisher ein Sanctum-`token` samt `user`. Antwortet `429`, wenn AccountSphere drosselt (5 Logins/Minute je IP – alle Logins teilen sich die IP des TasksSphere-Servers), und `503`, wenn AccountSphere nicht erreichbar ist.
 - `POST /api/register`, `POST /api/forgot-password`: `410 Gone` mit `url` zu AccountSphere.
 - `PUT /api/profile`: ändert nur noch `language`. Unveränderte `first_name`/`last_name`/`email` werden akzeptiert, Änderungen daran oder ein `password` mit `422` abgelehnt.
 - `POST /api/logout`: Logout (erfordert Bearer Token).
