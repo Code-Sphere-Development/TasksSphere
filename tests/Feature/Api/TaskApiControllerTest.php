@@ -708,3 +708,42 @@ test('store works without a task list', function () {
         ->assertCreated()
         ->assertJsonPath('task_list_id', null);
 });
+
+test('store with a known external_id returns the existing task instead of a duplicate', function () {
+    Notification::fake();
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $first = $this->postJson('/api/tasks', ['title' => 'Steuer', 'external_id' => 'gehirn-42', 'notify' => true])
+        ->assertCreated();
+
+    $this->postJson('/api/tasks', ['title' => 'Steuer (Wiederholung)', 'external_id' => 'gehirn-42', 'notify' => true])
+        ->assertOk()
+        ->assertJsonPath('id', $first->json('id'))
+        ->assertJsonPath('title', 'Steuer');
+
+    expect($user->tasks()->count())->toBe(1);
+    Notification::assertSentToTimes($user, TaskReminderNotification::class, 1);
+});
+
+test('external_id is unique per owner, not globally', function () {
+    $a = User::factory()->create();
+    $b = User::factory()->create();
+
+    Sanctum::actingAs($a);
+    $this->postJson('/api/tasks', ['title' => 'A', 'external_id' => 'x'])->assertCreated();
+
+    Sanctum::actingAs($b);
+    $this->postJson('/api/tasks', ['title' => 'B', 'external_id' => 'x'])->assertCreated();
+});
+
+test('a deleted task with the same external_id is not recreated', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+
+    $id = $this->postJson('/api/tasks', ['title' => 'Weg', 'external_id' => 'y'])->json('id');
+    $this->deleteJson("/api/tasks/{$id}")->assertSuccessful();
+
+    $this->postJson('/api/tasks', ['title' => 'Weg', 'external_id' => 'y'])->assertOk()->assertJsonPath('id', $id);
+    expect($user->tasks()->count())->toBe(0);
+});
