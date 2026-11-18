@@ -36,6 +36,7 @@ class AuthController extends Controller
             // nirgends erkennbar war. Der Name steuert weiterhin die Herkunft
             // (config/tasks.php sources_by_token_name).
             'device_name' => 'nullable|string|max:255',
+            'device_id' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -65,9 +66,29 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'token' => $user->createToken($request->input('device_name') ?: 'api')->plainTextToken,
+            'token' => $this->issueToken($user, $request->input('device_name') ?: 'api', $deviceId),
             'user' => $user,
         ]);
+    }
+
+    /**
+     * Eine Sitzung je Geraet: Kennt der Aufrufer seine Geraete-ID, ersetzt das
+     * neue Token die bisherigen dieses Geraets, statt sich daneben zu stellen.
+     * Ohne ID (Agent, Home Assistant) bleibt alles wie bisher.
+     */
+    private function issueToken(User $user, string $name, ?string $deviceId): string
+    {
+        if ($deviceId) {
+            $user->tokens()->where('device_id', $deviceId)->delete();
+        }
+
+        $token = $user->createToken($name);
+
+        if ($deviceId) {
+            $token->accessToken->forceFill(['device_id' => $deviceId])->save();
+        }
+
+        return $token->plainTextToken;
     }
 
     private function managedByAccountSphere(string $path)

@@ -4,6 +4,7 @@ use App\Models\User;
 use App\Models\UserDevice;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
@@ -316,4 +317,54 @@ test('login without device name issues a token named api', function () {
     ])->assertOk()->assertJsonStructure(['token']);
 
     expect(User::firstWhere('codesphere_id', 42)->tokens()->pluck('name')->all())->toBe(['api']);
+});
+
+test('a new login from the same device replaces its previous session', function () {
+    fakeAccountSphereLogin(['id' => 42, 'name' => 'Jane Doe', 'email' => 'jane@example.com', 'language' => 'de']);
+    $login = fn (array $extra) => $this->postJson('/api/login', ['email' => 'jane@example.com', 'password' => 'secret123', 'device_name' => 'flutter_app'] + $extra)->assertOk();
+
+    $login(['device_id' => 'iphone-1']);
+    $login(['device_id' => 'iphone-1']);
+    $login(['device_id' => 'ipad-1']);
+
+    $tokens = User::firstWhere('codesphere_id', 42)->tokens()->pluck('device_id')->sort()->values()->all();
+    expect($tokens)->toBe(['ipad-1', 'iphone-1']);
+});
+
+test('the device id may also come from the X-Device-ID header', function () {
+    fakeAccountSphereLogin(['id' => 42, 'name' => 'Jane Doe', 'email' => 'jane@example.com', 'language' => 'de']);
+
+    foreach (range(1, 2) as $_) {
+        $this->postJson('/api/login', ['email' => 'jane@example.com', 'password' => 'secret123'], ['X-Device-ID' => 'pixel-7'])->assertOk();
+    }
+
+    expect(User::firstWhere('codesphere_id', 42)->tokens()->count())->toBe(1);
+});
+
+test('logins without a device id keep adding tokens as before', function () {
+    fakeAccountSphereLogin(['id' => 42, 'name' => 'Jane Doe', 'email' => 'jane@example.com', 'language' => 'de']);
+
+    foreach (range(1, 2) as $_) {
+        $this->postJson('/api/login', ['email' => 'jane@example.com', 'password' => 'secret123', 'device_name' => 'gehirn-agent'])->assertOk();
+    }
+
+    expect(User::firstWhere('codesphere_id', 42)->tokens()->count())->toBe(2);
+});
+
+test('the old token of a replaced session is rejected and the rejection is logged', function () {
+    fakeAccountSphereLogin(['id' => 42, 'name' => 'Jane Doe', 'email' => 'jane@example.com', 'language' => 'de']);
+    $login = fn () => $this->postJson('/api/login', ['email' => 'jane@example.com', 'password' => 'secret123', 'device_id' => 'iphone-1'])->json('token');
+
+    $old = $login();
+    $login();
+    $oldId = (int) strstr($old, '|', true);
+
+    Log::spy();
+    $this->app['auth']->forgetGuards();
+
+    $this->getJson('/api/profile', ['Authorization' => 'Bearer '.$old])->assertUnauthorized();
+
+    Log::shouldHaveReceived('info')->withArgs(fn ($message, $context) => $message === 'API: Token abgelehnt'
+        && $context['token_id'] === $oldId
+        && $context['token_exists'] === false)->once();
 });
