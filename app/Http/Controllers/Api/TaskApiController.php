@@ -116,7 +116,21 @@ class TaskApiController extends Controller
                 ->where('user_id', Auth::id())
                 ->whereNull('deleted_at')],
             'notify' => 'nullable|boolean',
+            'external_id' => 'nullable|string|max:255',
         ]);
+
+        // Wiederholter Aufruf mit derselben Kennung: die bestehende Aufgabe
+        // zurueckgeben (200 statt 201), ohne sie zu aendern oder erneut zu
+        // benachrichtigen. Auch eine geloeschte zaehlt, sonst kaeme sie wieder.
+        if (! empty($validated['external_id'])) {
+            $existing = Auth::user()->tasks()->withTrashed()
+                ->where('external_id', $validated['external_id'])
+                ->first();
+
+            if ($existing) {
+                return $existing;
+            }
+        }
 
         if (! empty($validated['due_at']) && ! empty($validated['recurrence_timezone'])) {
             $validated['due_at'] = Carbon::parse($validated['due_at'], $validated['recurrence_timezone'])

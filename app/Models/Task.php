@@ -34,6 +34,7 @@ class Task extends Model
         'recurrence_timezone',
         'last_notified_at',
         'source',
+        'external_id',
     ];
 
     protected $casts = [
