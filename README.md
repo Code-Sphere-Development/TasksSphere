@@ -102,7 +102,7 @@ Alternativ lassen sich Tokens in der Weboberfläche unter **API-Tokens** (`/user
 
 ### Aufgaben (Tasks)
 
-- `GET /api/tasks`: Liste aller aktiven Basis-Aufgaben.
+- `GET /api/tasks`: Liste aller aktiven Basis-Aufgaben. Optionale Filter: `due_before` (Datum, nur Aufgaben mit Frist davor), `source` (`manual`, `agent`, `import`), `list_id`, `include=assigned` (auch zugewiesene Aufgaben). Mit `per_page` (1–100) kommt eine Laravel-Paginierung (`data`, `total`, `last_page`, …), ohne bleibt es ein flaches Array.
 - `POST /api/tasks`: Neue Aufgabe erstellen.
   - **Felder**: `title` (string), `description` (text, nullable), `due_at` (datetime), `recurrence_rule` (JSON, optional).
   - **Recurrence Rule**: `{"frequency": "hourly|daily|weekly|monthly", "interval": 1, "times": ["HH:mm", ...], "weekdays": [1-7, ...]}`.

@@ -46,6 +46,44 @@ test('index returns only the authenticated users active tasks ordered by due_at'
     expect($ids)->toBe([$sooner->id, $later->id]);
 });
 
+test('index filters by due_before, source and list_id', function () {
+    $user = User::factory()->create();
+    $list = TaskList::factory()->for($user)->create();
+
+    $due = Task::factory()->for($user)->create(['due_at' => now()->addDay(), 'source' => 'manual', 'completed_at' => null, 'is_archived' => false]);
+    $agent = Task::factory()->for($user)->create(['due_at' => now()->addDays(10), 'source' => 'agent', 'completed_at' => null, 'is_archived' => false]);
+    $listed = Task::factory()->for($user)->create(['due_at' => null, 'task_list_id' => $list->id, 'completed_at' => null, 'is_archived' => false]);
+
+    Sanctum::actingAs($user);
+
+    $ids = fn (string $query) => collect($this->getJson('/api/tasks?'.$query)->assertOk()->json())->pluck('id')->all();
+
+    expect($ids('due_before='.urlencode(now()->addDays(3)->toIso8601String())))->toBe([$due->id])
+        ->and($ids('source=agent'))->toBe([$agent->id])
+        ->and($ids('list_id='.$list->id))->toBe([$listed->id]);
+});
+
+test('index rejects an unknown source', function () {
+    Sanctum::actingAs(User::factory()->create());
+
+    $this->getJson('/api/tasks?source=alexa')->assertUnprocessable()->assertJsonValidationErrors('source');
+});
+
+test('index paginates only when per_page is given', function () {
+    $user = User::factory()->create();
+    Task::factory()->for($user)->count(3)->create(['completed_at' => null, 'is_archived' => false]);
+
+    Sanctum::actingAs($user);
+
+    $this->getJson('/api/tasks')->assertOk()->assertJsonCount(3);
+
+    $this->getJson('/api/tasks?per_page=2')
+        ->assertOk()
+        ->assertJsonCount(2, 'data')
+        ->assertJsonPath('total', 3)
+        ->assertJsonPath('last_page', 2);
+});
+
 /*
 |--------------------------------------------------------------------------
 | occurrences — GET /api/tasks/occurrences

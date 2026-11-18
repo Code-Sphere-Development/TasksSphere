@@ -25,18 +25,38 @@ class TaskApiController extends Controller
      * Gehirn-Agent haengt an diesem Endpunkt; seine Antwort darf sich durch
      * die Zuweisung nicht stillschweigend aendern. Wer zugewiesene Aufgaben
      * mitsehen will, fragt ausdruecklich mit include=assigned danach.
+     *
+     * Filter: due_before (nur Aufgaben mit Frist davor), source, list_id.
      */
     public function index(Request $request)
     {
+        $validated = $request->validate([
+            'due_before' => 'nullable|date',
+            'source' => ['nullable', Rule::enum(TaskSource::class)],
+            'list_id' => 'nullable|integer',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
         $query = $request->query('include') === 'assigned'
             ? Task::forPerson(Auth::id())
             : Auth::user()->tasks();
 
-        return $query
+        $query
             ->where('is_archived', false)
             ->whereNull('completed_at')
+            ->when($validated['due_before'] ?? null, fn ($q, $dueBefore) => $q->where('due_at', '<', Carbon::parse($dueBefore)->setTimezone('UTC')))
+            ->when($validated['source'] ?? null, fn ($q, $source) => $q->where('source', $source))
+            ->when($validated['list_id'] ?? null, fn ($q, $listId) => $q->where('task_list_id', $listId))
             ->orderBy('due_at', 'asc')
-            ->get();
+            ->orderBy('id');
+
+        // Seiten nur auf Nachfrage: Mobil-App und Gehirn-Agent erwarten ein
+        // flaches Array und duerfen es ohne per_page weiter bekommen.
+        if (isset($validated['per_page'])) {
+            return $query->paginate($validated['per_page'])->withQueryString();
+        }
+
+        return $query->get();
     }
 
     public function occurrences(Request $request)
