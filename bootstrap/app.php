@@ -19,7 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->append(SetLocale::class);
+        // Auf Web-Routen setzt code-sphere/oauth (LangMiddleware) die Sprache.
+        // Die Mobil-App ruft die API ohne Session auf; dort gilt weiter der
+        // Accept-Language-Header. Vorangestellt, damit es wie bisher vor
+        // auth:sanctum laeuft.
+        $middleware->api(prepend: [SetLocale::class]);
         $middleware->append(HandleFcmTokenHeader::class);
         $middleware->trustProxies(at: [
             '127.0.0.1',

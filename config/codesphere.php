@@ -76,15 +76,48 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Profile Refresh
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, the cached profile is re-fetched once it is older than
+    | cache_ttl, so changes made in CodeSphere Accounts (language, name,
+    | groups) reach the app without a new login.
+    |
+    */
+
+    'refresh_profile' => (bool) env('CODESPHERE_REFRESH_PROFILE', true),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Locales
+    |--------------------------------------------------------------------------
+    |
+    | Locales the app has translations for (two-letter codes). null detects
+    | them from the app's lang directory: every lang/{locale}.json file and
+    | lang/{locale}/ directory (not lang/vendor), plus 'en'. Set a list such
+    | as ['de', 'en'] to restrict or pin them.
+    |
+    | The request locale is the signed-in user's CodeSphere language, else
+    | the URL prefix (mcamara/laravel-localization), else the Accept-Language
+    | header, else 'en' — only available locales are used.
+    |
+    */
+
+    'locales' => null,
+
+    /*
+    |--------------------------------------------------------------------------
     | OAuth Scopes
     |--------------------------------------------------------------------------
     |
     | The OAuth scopes to request during the authorization flow. Adjust this
     | only if you have a reason to limit or extend the requested permissions.
+    | `settings` lets the language switcher (codesphere.language) save the
+    | language in CodeSphere Accounts.
     |
     */
 
-    'scopes' => ['openid', 'profile', 'email', 'groups'],
+    'scopes' => ['openid', 'profile', 'email', 'groups', 'settings'],
 
     /*
     |--------------------------------------------------------------------------
