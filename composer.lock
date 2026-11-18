@@ -330,21 +330,27 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Code-Sphere-Development/oauth.git",
-                "reference": "c2fc6abb4829fe27449f307eb21dc77ce46bc7ec"
+                "reference": "71840d954111086ed75ffc18aa7f1e94a6e76a68"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Code-Sphere-Development/oauth/zipball/c2fc6abb4829fe27449f307eb21dc77ce46bc7ec",
-                "reference": "c2fc6abb4829fe27449f307eb21dc77ce46bc7ec",
+                "url": "https://api.github.com/repos/Code-Sphere-Development/oauth/zipball/71840d954111086ed75ffc18aa7f1e94a6e76a68",
+                "reference": "71840d954111086ed75ffc18aa7f1e94a6e76a68",
                 "shasum": ""
             },
             "require": {
                 "guzzlehttp/guzzle": "^7.0",
-                "illuminate/auth": "^11.0|^12.0|^13.0",
-                "illuminate/contracts": "^11.0|^12.0|^13.0",
-                "illuminate/http": "^11.0|^12.0|^13.0",
-                "illuminate/support": "^11.0|^12.0|^13.0",
+                "illuminate/auth": "^12.0|^13.0",
+                "illuminate/contracts": "^12.0|^13.0",
+                "illuminate/http": "^12.0|^13.0",
+                "illuminate/support": "^12.0|^13.0",
                 "php": "^8.2"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.0",
+                "orchestra/testbench": "^10.0|^11.0",
+                "pestphp/pest": "^3.0|^4.0|^5.1"
             },
             "default-branch": true,
             "type": "library",
@@ -382,7 +388,7 @@
                 "issues": "https://github.com/Code-Sphere-Development/oauth/issues",
                 "source": "https://github.com/Code-Sphere-Development/oauth/tree/main"
             },
-            "time": "2026-11-13T12:07:18+00:00"
+            "time": "2026-11-18T13:22:38+00:00"
         },
         {
             "name": "cuyz/valinor",
