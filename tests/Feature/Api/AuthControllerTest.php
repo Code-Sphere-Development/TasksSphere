@@ -368,3 +368,17 @@ test('the old token of a replaced session is rejected and the rejection is logge
         && $context['token_id'] === $oldId
         && $context['token_exists'] === false)->once();
 });
+
+test('client headers are truncated before they are logged', function () {
+    Log::spy();
+
+    $this->getJson('/api/profile', [
+        'Authorization' => 'Bearer 999|unknown',
+        'X-Device-ID' => str_repeat('d', 500),
+        'User-Agent' => str_repeat('u', 500),
+    ])->assertUnauthorized();
+
+    Log::shouldHaveReceived('info')->withArgs(fn ($message, $context) => $message === 'API: Token abgelehnt'
+        && strlen($context['device_id']) === 64
+        && strlen($context['user_agent']) <= 123)->once();
+});

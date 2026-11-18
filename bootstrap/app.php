@@ -8,6 +8,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\PersonalAccessToken;
 use Sentry\Laravel\Integration;
 
@@ -45,8 +46,9 @@ return Application::configure(basePath: dirname(__DIR__))
                     'token_id' => $tokenId,
                     'token_exists' => $tokenId ? PersonalAccessToken::whereKey($tokenId)->exists() : null,
                     'path' => $request->path(),
-                    'device_id' => $request->header('X-Device-ID'),
-                    'user_agent' => $request->userAgent(),
+                    // Kopfzeilen kommen ungeprueft vom Client: gekuerzt loggen.
+                    'device_id' => Str::limit((string) $request->header('X-Device-ID'), 64, ''),
+                    'user_agent' => Str::limit((string) $request->userAgent(), 120),
                 ]);
             }
 
